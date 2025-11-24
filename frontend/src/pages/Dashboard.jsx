@@ -1,0 +1,253 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { useChaos } from '../context/ChaosContext'
+import { useUIChaos } from '../context/UIChaosContext'
+import { useIdleDetection } from '../hooks/useIdleDetection'
+import api from '../api/axios'
+import FloatingButton from '../components/FloatingButton'
+import FaltuPopup, { getRandomMessage } from '../components/FaltuPopup'
+import DiscoMode from '../components/DiscoMode'
+import { triggerConfettiBurst } from '../utils/confettiBlast'
+
+const stupidQuotes = [
+  "Life is too short to be serious all the time!",
+  "Chaos is just order waiting to be discovered!",
+  "Why be normal when you can be chaotic?",
+  "Randomness is the spice of life!",
+  "In chaos, we find freedom!",
+  "Being pointless is the point!",
+  "Faltu fun is the best fun!",
+  "Embrace the randomness!",
+]
+
+const Dashboard = () => {
+  const { user, logout, fetchProfile } = useAuth()
+  const { triggerChaos, chaosActive } = useChaos()
+  const { discoMode, randomTheme, triggerDiscoMode } = useUIChaos()
+  const navigate = useNavigate()
+  const [points, setPoints] = useState(0)
+  const [loginStreak, setLoginStreak] = useState(0)
+  const [lastDraw, setLastDraw] = useState(null)
+  const [showPopup, setShowPopup] = useState(false)
+  const [popupMessage, setPopupMessage] = useState('')
+  const [currentQuote, setCurrentQuote] = useState(stupidQuotes[0])
+  const [buttonWiggle, setButtonWiggle] = useState(false)
+
+  const isIdle = useIdleDetection(15000, async () => {
+    // Try to get AI-generated engagement, fallback to random message
+    try {
+      // Could call API here if endpoint exists
+      // const aiEngagement = await getAIIdleEngagement()
+      // if (aiEngagement && aiEngagement.content) {
+      //   setPopupMessage(aiEngagement.content)
+      // } else {
+        setPopupMessage(getRandomMessage())
+      // }
+    } catch (error) {
+      setPopupMessage(getRandomMessage())
+    }
+    setShowPopup(true)
+  })
+
+  useEffect(() => {
+    // Only fetch if user is loaded
+    if (user) {
+      fetchDashboardData()
+    }
+    
+    // Rotate quotes
+    const quoteInterval = setInterval(() => {
+      setCurrentQuote(stupidQuotes[Math.floor(Math.random() * stupidQuotes.length)])
+    }, 5000)
+
+    // Random button wiggle
+    const wiggleInterval = setInterval(() => {
+      if (Math.random() > 0.7) {
+        setButtonWiggle(true)
+        setTimeout(() => setButtonWiggle(false), 1000)
+      }
+    }, 8000)
+
+    return () => {
+      clearInterval(quoteInterval)
+      clearInterval(wiggleInterval)
+    }
+  }, [user])
+
+  const fetchDashboardData = async () => {
+    try {
+      const profileResponse = await api.get('/users/profile')
+      if (profileResponse.data?.points) {
+        setPoints(profileResponse.data.points.total_points || 0)
+        setLoginStreak(profileResponse.data.points.login_streak || 0)
+      }
+
+      try {
+        const drawResponse = await api.get('/lucky-draws/last')
+        // Only set if draw exists and has winner
+        if (drawResponse.data && drawResponse.data.winner) {
+          setLastDraw(drawResponse.data)
+        } else {
+          setLastDraw(null)
+        }
+      } catch (drawError) {
+        // No lucky draw yet, that's okay
+        setLastDraw(null)
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+      // Set defaults on error
+      setPoints(0)
+      setLoginStreak(0)
+      setLastDraw(null)
+    }
+  }
+
+  const handleTriggerChaos = async () => {
+    triggerConfettiBurst()
+    triggerDiscoMode(3000)
+    setButtonWiggle(true)
+    setTimeout(() => setButtonWiggle(false), 2000)
+    
+    await triggerChaos()
+    setTimeout(() => {
+      fetchDashboardData()
+    }, 1000)
+  }
+
+  // Show loading if user not loaded yet
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-red-500">
+        <div className="text-white text-2xl font-bold animate-pulse">Loading...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`min-h-screen transition-all duration-500 ${randomTheme || 'bg-gradient-to-br from-purple-500 via-pink-500 to-red-500'}`}>
+      <DiscoMode active={discoMode} />
+      
+      {showPopup && (
+        <FaltuPopup
+          message={popupMessage}
+          onClose={() => setShowPopup(false)}
+          type="info"
+        />
+      )}
+
+      <header className="bg-white bg-opacity-20 backdrop-blur-md p-4 shadow-lg">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <h1 className="text-3xl font-black text-white drop-shadow-lg animate-pulse-crazy">
+            🎉 FaltuVerse Dashboard
+          </h1>
+          <div className="flex items-center gap-4">
+            {user?.profile_photo && (
+              <img 
+                src={user.profile_photo} 
+                alt={user?.name || 'User'} 
+                className="w-12 h-12 rounded-full border-4 border-white shadow-lg animate-float"
+              />
+            )}
+            <span className="text-white font-bold text-lg">{user?.name || 'User'}</span>
+            <button 
+              onClick={logout} 
+              className="px-4 py-2 bg-white bg-opacity-30 rounded-full text-white font-bold hover:bg-opacity-50 transition-all animate-wiggle"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform animate-float">
+            <h3 className="text-gray-600 text-lg mb-2">Total Points</h3>
+            <p className="text-5xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {points}
+            </p>
+          </div>
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform animate-float" style={{ animationDelay: '0.5s' }}>
+            <h3 className="text-gray-600 text-lg mb-2">Login Streak</h3>
+            <p className="text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              {loginStreak} 🔥
+            </p>
+          </div>
+        </div>
+
+        {/* Rotating Quote */}
+        <div className="bg-white bg-opacity-80 rounded-3xl p-6 text-center shadow-xl animate-pulse-crazy">
+          <p className="text-2xl font-bold text-gray-800 italic">
+            "{currentQuote}"
+          </p>
+        </div>
+
+        {/* Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform">
+            <h3 className="text-2xl font-black mb-4 text-gray-800">💬 Random Chat</h3>
+            <p className="text-gray-600 mb-4">Join a random chat room and talk nonsense!</p>
+            <FloatingButton
+              onClick={() => navigate('/chat')}
+              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+            >
+              Go to Chat 🚀
+            </FloatingButton>
+          </div>
+
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform">
+            <h3 className="text-2xl font-black mb-4 text-gray-800">💥 Trigger Chaos</h3>
+            <p className="text-gray-600 mb-4">Cause random chaos events across the app!</p>
+            <FloatingButton
+              onClick={handleTriggerChaos}
+              disabled={chaosActive}
+              chaos={true}
+              className={`w-full bg-gradient-to-r from-red-500 to-pink-500 text-white ${buttonWiggle ? 'animate-wiggle' : ''}`}
+            >
+              {chaosActive ? 'CHAOS ACTIVE! 🔥' : 'PRESS FOR SOMETHING POINTLESS 💥'}
+            </FloatingButton>
+          </div>
+
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform">
+            <h3 className="text-2xl font-black mb-4 text-gray-800">😂 Random Joke</h3>
+            <p className="text-gray-600 mb-4">Get a random AI-generated nonsense joke!</p>
+            <FloatingButton
+              onClick={() => navigate('/jokes')}
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+            >
+              Get Joke 🎭
+            </FloatingButton>
+          </div>
+        </div>
+
+        {/* Last Lucky Draw */}
+        {lastDraw && lastDraw.winner && (
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl animate-bounce-silly">
+            <h3 className="text-2xl font-black mb-4 text-gray-800">🎰 Last Lucky Draw Winner</h3>
+            <div className="flex items-center gap-4">
+              {lastDraw.winner?.profile_photo && (
+                <img 
+                  src={lastDraw.winner.profile_photo} 
+                  alt={lastDraw.winner?.name || 'Winner'} 
+                  className="w-16 h-16 rounded-full border-4 border-yellow-400 shadow-lg animate-float"
+                />
+              )}
+              <div>
+                <p className="text-xl font-bold text-gray-800">{lastDraw.winner?.name || 'Unknown'}</p>
+                <p className="text-lg text-yellow-600 font-bold">Won {lastDraw.reward_points || 0} points! 🎉</p>
+                <p className="text-sm text-gray-500">
+                  {lastDraw.timestamp ? new Date(lastDraw.timestamp).toLocaleString() : 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+export default Dashboard
