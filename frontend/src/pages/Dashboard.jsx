@@ -246,6 +246,16 @@ const Dashboard = () => {
               Play Tambola 🎲
             </FloatingButton>
           </div>
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform">
+            <h3 className="text-2xl font-black mb-4 text-gray-800">🎮 Faltu Games</h3>
+            <p className="text-gray-600 mb-4">10+ micro-games! Bakchodi, memes, debates, and more chaos!</p>
+            <FloatingButton
+              onClick={() => navigate('/games')}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+            >
+              Play Games 🎮
+            </FloatingButton>
+          </div>
         </div>
 
         {/* Last Lucky Draw */}

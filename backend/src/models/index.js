@@ -7,6 +7,17 @@ const UserPoints = require('./UserPoints');
 const ChaosEvent = require('./ChaosEvent');
 const TambolaRoom = require('./TambolaRoom');
 const TambolaTicket = require('./TambolaTicket');
+const BakchodiChallenge = require('./BakchodiChallenge');
+const Debate = require('./Debate');
+const MemeBattle = require('./MemeBattle');
+const WheelSpin = require('./WheelSpin');
+const FuturePrediction = require('./FuturePrediction');
+const TapGameScore = require('./TapGameScore');
+const RunawayButtonWin = require('./RunawayButtonWin');
+const Dare = require('./Dare');
+const Roast = require('./Roast');
+const GameRoom = require('./GameRoom');
+const GameRoomUser = require('./GameRoomUser');
 
 // Define associations
 ChatMessage.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -29,6 +40,20 @@ TambolaTicket.belongsTo(TambolaRoom, { foreignKey: 'room_id', as: 'room' });
 TambolaRoom.hasMany(TambolaTicket, { foreignKey: 'room_id', as: 'tickets' });
 TambolaRoom.belongsTo(User, { foreignKey: 'winner_user_id', as: 'winner' });
 
+// Games associations
+BakchodiChallenge.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Debate.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+MemeBattle.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+WheelSpin.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+FuturePrediction.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+TapGameScore.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+RunawayButtonWin.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Dare.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Roast.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+GameRoomUser.belongsTo(GameRoom, { foreignKey: 'game_room_id', as: 'room' });
+GameRoomUser.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+GameRoom.hasMany(GameRoomUser, { foreignKey: 'game_room_id', as: 'users' });
+
 module.exports = {
   sequelize,
   User,
@@ -38,6 +63,17 @@ module.exports = {
   UserPoints,
   ChaosEvent,
   TambolaRoom,
-  TambolaTicket
+  TambolaTicket,
+  BakchodiChallenge,
+  Debate,
+  MemeBattle,
+  WheelSpin,
+  FuturePrediction,
+  TapGameScore,
+  RunawayButtonWin,
+  Dare,
+  Roast,
+  GameRoom,
+  GameRoomUser
 };
 

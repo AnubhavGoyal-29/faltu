@@ -8,6 +8,7 @@ import ChatRoom from './pages/ChatRoom'
 import Jokes from './pages/Jokes'
 import Wordle from './pages/Wordle'
 import Tambola from './pages/Tambola'
+import Games from './pages/Games'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
@@ -56,6 +57,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Tambola />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games"
+                element={
+                  <ProtectedRoute>
+                    <Games />
                   </ProtectedRoute>
                 }
               />
