@@ -1,4 +1,4 @@
-const { LuckyDraw, User, UserPoints } = require('../models');
+const { LuckyDraw, User } = require('../models');
 const { addPoints } = require('./pointsService');
 
 // Bakchod messages for lucky draw
@@ -15,22 +15,19 @@ const bakchodMessages = [
   "Koi bakchod jeet gaya!"
 ];
 
-// Get random active users (users who have been active recently)
+// Get random active users (simplified - get all users)
 const getRandomActiveUsers = async () => {
-  // Get users who have points (means they've logged in)
-  const usersWithPoints = await UserPoints.findAll({
-    include: [{
-      model: User,
-      as: 'user',
-      attributes: ['user_id', 'name', 'email', 'profile_photo']
-    }],
+  // Get all users (simpler approach)
+  const allUsers = await User.findAll({
+    attributes: ['user_id', 'name', 'email', 'profile_photo'],
     limit: 100
   });
 
-  return usersWithPoints
-    .map(up => up.user)
-    .filter(Boolean)
-    .filter(user => user.name && user.name !== 'Admin User'); // Exclude admin
+  return allUsers.filter(user => 
+    user.name && 
+    user.name !== 'Admin User' && 
+    user.email !== 'admin@faltuverse.com'
+  );
 };
 
 // Run minute lucky draw
@@ -122,4 +119,3 @@ module.exports = {
   runMinuteLuckyDraw,
   getRecentMinuteDraws
 };
-
