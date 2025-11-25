@@ -35,7 +35,7 @@ export GOOGLE_REDIRECT_URI=http://localhost:5000/api/auth/google/callback
 export FRONTEND_URL=http://localhost:5173
 
 # OpenAI Configuration (Optional - AI features work without it)
-export OPENAI_API_KEY=
+export OPENAI_API_KEY="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"
 export OPENAI_MODEL=gpt-3.5-turbo
 
 # ============================================

@@ -44,18 +44,44 @@ const runMinuteLuckyDraw = async () => {
     };
     }
 
-    // 70% chance to run lucky draw
-    if (Math.random() > 0.7) {
-      const msg = bakchodMessages[Math.floor(Math.random() * bakchodMessages.length)];
-      console.log(`🎰 [MINUTE DRAW] 💬 Bakchod message (30% chance): ${msg}`);
+    // 50% chance winner, 25% prank, 25% joke
+    const random = Math.random();
+    
+    if (random < 0.5) {
+      // 50% chance: Actual winner
+      console.log(`🎰 [MINUTE DRAW] 🎲 Winner select kar rahe hain... (50% chance)`);
+    } else if (random < 0.75) {
+      // 25% chance: Prank (no winner)
+      const prankMessages = [
+        "Arre yaar! Koi winner nahi nikla! 😂",
+        "Sabko pagal banaya! Koi jeeta nahi! 🎭",
+        "Just kidding! Koi nahi jeeta! 😜",
+        "Tum sab pagal ho! Koi winner nahi hai! 🤡",
+        "Gotcha! Sabko fool banaya! 🎪",
+        "Haha! Koi nahi jeeta! Next time pakka! 😄"
+      ];
+      const msg = prankMessages[Math.floor(Math.random() * prankMessages.length)];
+      console.log(`🎰 [MINUTE DRAW] 🤡 PRANK! (25% chance): ${msg}`);
       return {
         shouldRun: false,
         message: msg,
-        type: 'skip'
+        type: 'prank'
+      };
+    } else {
+      // 25% chance: Joke
+      const jokes = [
+        "Ek ladki ne apne boyfriend se kaha: 'Tumhare paas kya hai?' Boyfriend: 'Mere paas iPhone hai, car hai, ghar hai...' Ladki: 'Toh phir tumhare paas kya nahi hai?' Boyfriend: 'Tumhare jaisi girlfriend nahi hai!' 😂",
+        "Teacher: 'Beta, tumhare papa ka naam kya hai?' Student: 'Papa ka naam Papa hai!' Teacher: 'Tumhare dada ka naam?' Student: 'Dada ka naam Dada hai!' Teacher: 'Tum pagal ho?' Student: 'Nahi ma'am, meri mummy pagal hai!' 🤣",
+        "Ek aadmi ne apni biwi se pucha: 'Tum mujhe kyun shaadi kiya?' Biwi: 'Tumhare paas paisa tha!' Aadmi: 'Ab kya?' Biwi: 'Ab tumhare paas paisa nahi hai!' 😅"
+      ];
+      const joke = jokes[Math.floor(Math.random() * jokes.length)];
+      console.log(`🎰 [MINUTE DRAW] 😂 JOKE! (25% chance)`);
+      return {
+        shouldRun: false,
+        message: joke,
+        type: 'joke'
       };
     }
-    
-    console.log(`🎰 [MINUTE DRAW] 🎲 Winner select kar rahe hain... (70% chance)`);
 
     // Randomly pick a winner
     const randomIndex = Math.floor(Math.random() * activeUsers.length);

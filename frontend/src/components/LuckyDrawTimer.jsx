@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { io } from 'socket.io-client'
 import { useAuth } from '../context/AuthContext'
 import { triggerConfettiBurst } from '../utils/confettiBlast'
+import LuckyDrawCountdown from './LuckyDrawCountdown'
 
 const bakchodMessages = [
   "Kuch nahi hua...",
@@ -67,6 +68,38 @@ const LuckyDrawTimer = () => {
 
     return () => clearInterval(timer)
   }, [])
+
+  // Show countdown when 10 seconds left
+  const [showCountdown, setShowCountdown] = useState(false)
+
+  useEffect(() => {
+    if (timeLeft <= 10 && timeLeft > 0 && !showCountdown) {
+      setShowCountdown(true)
+    }
+    if (timeLeft > 10) {
+      setShowCountdown(false)
+    }
+  }, [timeLeft, showCountdown])
+
+  if (showCountdown && timeLeft <= 10) {
+    return (
+      <>
+        <LuckyDrawCountdown onClose={() => setShowCountdown(false)} />
+        {/* Keep timer visible but behind */}
+        <div className="fixed top-4 right-4 z-50">
+          <div className="bg-white bg-opacity-90 backdrop-blur-md rounded-2xl p-4 shadow-2xl border-2 border-yellow-400">
+            <div className="text-center">
+              <div className="text-2xl mb-2">🎰</div>
+              <div className="text-sm text-gray-600 mb-1">Next Lucky Draw</div>
+              <div className="text-3xl font-black text-purple-600 mb-2">
+                {timeLeft}s
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <div className="fixed top-4 right-4 z-50">
