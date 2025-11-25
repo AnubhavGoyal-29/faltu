@@ -90,6 +90,14 @@ cd ..
 echo ""
 echo "✅ Setup complete!"
 echo ""
+
+# Kill any existing processes on ports 5000 and 5173
+echo "🛑 Stopping any existing servers..."
+lsof -ti:5000 | xargs kill -9 2>/dev/null || true
+lsof -ti:5173 | xargs kill -9 2>/dev/null || true
+sleep 2
+
+echo ""
 echo "🚀 Starting servers..."
 echo ""
 echo "Backend will start on: http://localhost:5000"
@@ -113,17 +121,42 @@ fi
 
 # Start backend in background
 cd backend
+# Export all env vars explicitly
+export PORT DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD
+export JWT_SECRET JWT_EXPIRES_IN
+export GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI
+export FRONTEND_URL OPENAI_API_KEY OPENAI_MODEL
+
+# Use fnm if available
+if command -v fnm &> /dev/null; then
+    eval "$(fnm env)"
+    fnm use 20 > /dev/null 2>&1
+fi
+
 npm start > ../backend.log 2>&1 &
 BACKEND_PID=$!
 cd ..
 
 # Wait a bit for backend to start
-sleep 3
+sleep 5
 
 # Check if backend started
 if ! kill -0 $BACKEND_PID 2>/dev/null; then
-    echo "❌ Backend failed to start. Check backend.log for errors"
+    echo "❌ Backend failed to start. Check backend.log for errors:"
+    echo ""
+    tail -20 backend.log
     exit 1
+fi
+
+# Check if backend is listening on port
+if ! lsof -ti:5000 > /dev/null 2>&1; then
+    echo "⚠️  Backend process started but not listening on port 5000 yet..."
+    sleep 3
+    if ! lsof -ti:5000 > /dev/null 2>&1; then
+        echo "❌ Backend still not listening. Check backend.log:"
+        tail -20 backend.log
+        exit 1
+    fi
 fi
 
 # Start frontend
