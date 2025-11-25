@@ -4,7 +4,7 @@ const { User } = require('../models');
 // Submit wordle guess
 const submitGuess = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.user_id;
     const { guess } = req.body;
     const user = await User.findByPk(userId);
 
@@ -23,7 +23,7 @@ const submitGuess = async (req, res) => {
 // Get wordle hint
 const getHint = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.user_id;
     const user = await User.findByPk(userId);
     const attempts = parseInt(req.query.attempts) || 0;
 

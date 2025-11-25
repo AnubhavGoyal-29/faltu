@@ -17,6 +17,7 @@ const userRoutes = require('./routes/userRoutes');
 const jokeRoutes = require('./routes/jokeRoutes');
 const luckyDrawRoutes = require('./routes/luckyDrawRoutes');
 const chaosRoutes = require('./routes/chaosRoutes');
+const wordleRoutes = require('./routes/wordleRoutes');
 
 const app = express();
 const server = http.createServer(app);
