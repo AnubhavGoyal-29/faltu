@@ -87,10 +87,9 @@ check_env() {
     
     echo "Checking environment variables..."
     
-    # Backend required
-    if [ -z "$DB_PASSWORD" ] || [ "$DB_PASSWORD" = "YOUR_MYSQL_PASSWORD_HERE" ]; then
-        echo "❌ DB_PASSWORD not set"
-        missing=$((missing + 1))
+    # Backend required (empty password is allowed for MySQL without password)
+    if [ "$DB_PASSWORD" = "YOUR_MYSQL_PASSWORD_HERE" ]; then
+        echo "⚠️  DB_PASSWORD not set (using empty password - MySQL without password)"
     fi
     
     if [ -z "$JWT_SECRET" ] || [ "$JWT_SECRET" = "YOUR_SUPER_SECRET_JWT_KEY_CHANGE_THIS_IN_PRODUCTION" ]; then
@@ -158,5 +157,4 @@ echo ""
 echo "To start servers:"
 echo "  Backend:  cd backend && npm start"
 echo "  Frontend: cd frontend && npm run dev"
-echo ""
 
