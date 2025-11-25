@@ -225,6 +225,17 @@ const Dashboard = () => {
               Get Joke 🎭
             </FloatingButton>
           </div>
+
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform">
+            <h3 className="text-2xl font-black mb-4 text-gray-800">🎯 Wordle Game</h3>
+            <p className="text-gray-600 mb-4">Daily Hinglish wordle game! 5 letters ka word guess karo!</p>
+            <FloatingButton
+              onClick={() => navigate('/wordle')}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+            >
+              Play Wordle 🎯
+            </FloatingButton>
+          </div>
         </div>
 
         {/* Last Lucky Draw */}

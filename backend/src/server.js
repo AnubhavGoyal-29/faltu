@@ -47,6 +47,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/jokes', jokeRoutes);
 app.use('/api/lucky-draws', luckyDrawRoutes);
 app.use('/api/chaos', chaosRoutes);
+app.use('/api/wordle', wordleRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
