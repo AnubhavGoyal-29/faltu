@@ -178,6 +178,18 @@ const Wordle = () => {
             <p className="text-xl mb-4">
               {gameWon ? 'Sahi word guess kiya!' : '6 attempts khatam ho gaye!'}
             </p>
+            {gameLost && correctWord && (
+              <div className="mb-4 p-4 bg-red-100 rounded-lg border-2 border-red-400">
+                <p className="text-sm text-gray-600 mb-2 font-bold">Sahi word tha:</p>
+                <p className="text-4xl font-black text-red-600 animate-pulse">{correctWord}</p>
+              </div>
+            )}
+            {gameWon && correctWord && (
+              <div className="mb-4 p-4 bg-green-100 rounded-lg border-2 border-green-400">
+                <p className="text-sm text-gray-600 mb-2 font-bold">Sahi word:</p>
+                <p className="text-4xl font-black text-green-600">{correctWord}</p>
+              </div>
+            )}
             <FloatingButton
               onClick={() => {
                 setGuesses([])
@@ -186,6 +198,7 @@ const Wordle = () => {
                 setGameLost(false)
                 setCurrentGuess('')
                 setHint('')
+                setCorrectWord('')
               }}
               className="bg-green-600 text-white"
             >

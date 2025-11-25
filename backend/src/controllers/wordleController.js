@@ -42,7 +42,7 @@ const getDailyInfo = async (req, res) => {
     const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
     const revealWord = req.query.reveal === 'true'; // Only reveal if explicitly requested
     
-    const dailyWord = getDailyWordForReveal();
+    const dailyWord = getDailyWord();
     
     res.json({
       day: dayOfYear,
