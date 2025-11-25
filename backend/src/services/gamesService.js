@@ -113,6 +113,17 @@ const submitDebate = async (userId, topic, userArgument) => {
 };
 
 // Meme Battle
+const getRandomMemeImage = () => {
+  const images = [
+    'https://via.placeholder.com/400x300/FF6B6B/FFFFFF?text=Meme+1',
+    'https://via.placeholder.com/400x300/4ECDC4/FFFFFF?text=Meme+2',
+    'https://via.placeholder.com/400x300/45B7D1/FFFFFF?text=Meme+3',
+    'https://via.placeholder.com/400x300/FFA07A/FFFFFF?text=Meme+4',
+    'https://via.placeholder.com/400x300/98D8C8/FFFFFF?text=Meme+5'
+  ];
+  return images[Math.floor(Math.random() * images.length)];
+};
+
 const submitMemeCaption = async (userId, caption) => {
   const imageUrl = getRandomMemeImage();
   const user = await User.findByPk(userId);
