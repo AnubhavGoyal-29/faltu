@@ -52,9 +52,8 @@ const Wordle = () => {
           setGameLost(true)
           // Get correct word when game is lost
           try {
-            const dailyResponse = await api.get('/wordle/daily')
-            // We'll get the correct word from backend
-            fetchCorrectWord()
+            const dailyResponse = await api.get('/wordle/daily?reveal=true')
+            setCorrectWord(dailyResponse.data.correctWord || '')
           } catch (err) {
             console.error('Failed to get correct word:', err)
           }
