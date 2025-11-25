@@ -37,9 +37,20 @@ const JokeCard = ({ joke, loading = false }) => {
     >
       <div className="text-center">
         <span className="text-4xl mb-4 block">😂</span>
-        <p className="text-white text-xl font-bold leading-relaxed">
-          {joke}
-        </p>
+        {typeof joke === 'object' && joke.setup ? (
+          <>
+            <p className="text-white text-xl font-bold leading-relaxed mb-4">
+              {joke.setup}
+            </p>
+            <p className="text-white text-xl font-bold leading-relaxed">
+              {joke.punchline}
+            </p>
+          </>
+        ) : (
+          <p className="text-white text-xl font-bold leading-relaxed">
+            {typeof joke === 'object' ? (joke.joke || joke.punchline) : joke}
+          </p>
+        )}
       </div>
     </div>
   )

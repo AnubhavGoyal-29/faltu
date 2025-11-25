@@ -39,7 +39,7 @@ const Jokes = () => {
             ← Back
           </FloatingButton>
           <h1 className="text-4xl font-black text-white drop-shadow-2xl animate-pulse-crazy">
-            😂 Random Jokes Generator
+            😂 Bakchod Jokes Generator
           </h1>
           <div></div>
         </div>
@@ -61,7 +61,7 @@ const Jokes = () => {
             ) : (
               <span className="flex items-center gap-3">
                 <span>🎭</span>
-                Generate Nonsense Joke
+                Bakchod Joke Generate Karo
                 <span className="animate-bounce-silly">😂</span>
               </span>
             )}
@@ -77,8 +77,8 @@ const Jokes = () => {
         {!joke && !loading && (
           <div className="text-center text-white text-xl mt-20 animate-float">
             <p className="text-4xl mb-4">🎪</p>
-            <p>Click the button above to get a random joke!</p>
-            <p className="text-sm mt-2 opacity-80">Warning: Jokes may be extremely pointless 😂</p>
+            <p>Upar button click karo bakchod joke ke liye!</p>
+            <p className="text-sm mt-2 opacity-80">Warning: Jokes bahut faltu aur naughty ho sakte hain 😂</p>
           </div>
         )}
       </main>
