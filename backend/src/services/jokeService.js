@@ -61,6 +61,101 @@ const hinglishJokes = [
     setup: "Mummy: 'Beta, khaana kha lo!'",
     punchline: "Beta: 'Nahi chahiye!' Mummy: 'Kyun?' Beta: 'Bhook nahi hai!' Mummy: 'Toh phir kya chahiye?' Beta: 'Kuch nahi!' Mummy: 'Pagal ho kya?' Beta: 'Haan, kyunki main khaana nahi kha raha!' 😂",
     category: "family"
+  },
+  {
+    setup: "Ek scientist ne atom se pucha:",
+    punchline: "'Tum kyun sach nahi bolte?' Atom: 'Kyunki main sab kuch banata hoon!' Scientist: 'Kya matlab?' Atom: 'Main sab kuch make up karta hoon!' 😂",
+    category: "science"
+  },
+  {
+    setup: "Ek scarecrow ne award jeeta:",
+    punchline: "Kyunki wo field mein outstanding tha! Field mein khada tha, award mil gaya! 😄",
+    category: "general"
+  },
+  {
+    setup: "Ek anda ne joke sunaya:",
+    punchline: "Dusre ande ne kaha: 'Yaar, tumhara joke sunke main crack ho gaya!' 😂",
+    category: "food"
+  },
+  {
+    setup: "Ek fake noodle ko kya kehte hain?",
+    punchline: "Impasta! Kyunki wo fake pasta hai! 😅",
+    category: "food"
+  },
+  {
+    setup: "Ek math book bahut sad kyun thi?",
+    punchline: "Kyunki usme bahut saare problems the! Problems solve karni thi, isliye sad thi! 😂",
+    category: "education"
+  },
+  {
+    setup: "Ek bear ke paas teeth nahi hai, uska naam kya hai?",
+    punchline: "Gummy bear! Kyunki wo gummy hai! 😄",
+    category: "animals"
+  },
+  {
+    setup: "Programmers nature ko kyun pasand nahi karte?",
+    punchline: "Kyunki usme bahut saare bugs hain! Bugs fix karni padti hain! 😂",
+    category: "tech"
+  },
+  {
+    setup: "Switzerland ki best baat kya hai?",
+    punchline: "Pata nahi, par uska flag ek bada plus hai! Plus sign! 😄",
+    category: "general"
+  },
+  {
+    setup: "Coffee ne police complaint kyun ki?",
+    punchline: "Kyunki use mugged kiya gaya! Mugged matlab chori, aur coffee mug mein hoti hai! 😂",
+    category: "food"
+  },
+  {
+    setup: "Ek sote hue bull ko kya kehte hain?",
+    punchline: "Bulldozer! Kyunki wo so raha hai aur doze kar raha hai! 😅",
+    category: "animals"
+  },
+  {
+    setup: "Skeletons aapas mein kyun nahi ladte?",
+    punchline: "Kyunki unke paas guts nahi hain! Guts matlab himmat, par skeletons ke paas kuch nahi hota! 😂",
+    category: "general"
+  },
+  {
+    setup: "Kya orange hai aur parrot ki tarah sound karta hai?",
+    punchline: "Carrot! Kyunki carrot orange hai aur parrot ki tarah sound karta hai! 😄",
+    category: "food"
+  },
+  {
+    setup: "Tomato kyun red ho gaya?",
+    punchline: "Kyunki usne salad dressing dekhi! Dressing dekhke sharmaya aur red ho gaya! 😂",
+    category: "food"
+  },
+  {
+    setup: "Ek fish jo bowtie pehenti hai, uska naam kya hai?",
+    punchline: "Sofishticated! Kyunki wo sophisticated hai! 😅",
+    category: "animals"
+  },
+  {
+    setup: "Oysters charity ko kyun paise nahi dete?",
+    punchline: "Kyunki wo shellfish hain! Shellfish matlab selfish! 😂",
+    category: "animals"
+  },
+  {
+    setup: "Ek factory jo okay products banati hai, uska naam kya hai?",
+    punchline: "Satisfactory! Kyunki wo satisfactory products banati hai! 😄",
+    category: "general"
+  },
+  {
+    setup: "Golfer ne do pants kyun liye?",
+    punchline: "Kyunki agar usko hole in one mila toh ek pant mein hole ho jayega! 😂",
+    category: "sports"
+  },
+  {
+    setup: "Scientists stairs par kyun trust nahi karte?",
+    punchline: "Kyunki wo hamesha up to something hain! Up to something matlab kuch karne wale hain! 😄",
+    category: "science"
+  },
+  {
+    setup: "Baarish mein bear ko kya kehte hain?",
+    punchline: "Drizzly bear! Kyunki wo drizzly weather mein hai! 😂",
+    category: "animals"
   }
 ];
 
