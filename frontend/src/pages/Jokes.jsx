@@ -19,10 +19,18 @@ const Jokes = () => {
     
     try {
       const response = await api.get('/jokes/random')
-      setJoke(response.data.joke)
+      // Handle both string and object format
+      if (typeof response.data === 'string') {
+        setJoke(response.data)
+      } else if (response.data.joke) {
+        setJoke(response.data.joke)
+      } else {
+        // Object format with setup and punchline
+        setJoke(response.data)
+      }
     } catch (error) {
       console.error('Failed to get joke:', error)
-      setJoke("Why did the API break? Because it couldn't handle the chaos! 😂")
+      setJoke("Arre yaar! API break ho gaya! Chaos handle nahi kar paya! 😂")
     } finally {
       setLoading(false)
     }
