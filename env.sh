@@ -44,6 +44,7 @@ export OPENAI_MODEL=gpt-3.5-turbo
 
 export VITE_API_URL=http://localhost:5000
 export VITE_GOOGLE_CLIENT_ID=182449420217-nus093tc0cuod8mm56i6qtj89ceuvf6f.apps.googleusercontent.com
+export FRONTEND_URL=http://localhost:3000
 
 # ============================================
 # Helper Functions
