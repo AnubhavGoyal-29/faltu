@@ -7,15 +7,25 @@ const openai = new OpenAI({
 
 // Check if AI is enabled
 const isAIEnabled = () => {
-  return !!process.env.OPENAI_API_KEY;
+  const enabled = !!process.env.OPENAI_API_KEY;
+  console.log(`🤖 [AI CHECK] AI Enabled: ${enabled ? 'Haan bhai! ✅' : 'Nahi bhai, key nahi hai ❌'}`);
+  if (enabled) {
+    console.log(`🤖 [AI CHECK] API Key length: ${process.env.OPENAI_API_KEY?.length || 0} characters`);
+  }
+  return enabled;
 };
 
 // Call AI with structured context
 const callAI = async (context) => {
+  console.log(`🤖 [AI CALL] Reason: ${context.reason}, User: ${context.user?.name || 'N/A'}`);
+  
   if (!isAIEnabled()) {
+    console.log(`🤖 [AI CALL] ❌ AI disabled - fallback use hoga`);
     return null;
   }
 
+  console.log(`🤖 [AI CALL] ✅ AI enabled - OpenAI ko call kar rahe hain...`);
+  
   try {
     const systemPrompt = `You are a chaotic, fun, and entertaining AI assistant for FaltuVerse - a "pure entertainment for no reason" app. 
 Your role is to generate funny, pointless, but engaging content. Always respond in valid JSON format.
@@ -55,15 +65,20 @@ Respond ONLY with valid JSON, no markdown, no explanations.`;
     });
 
     const response = completion.choices[0].message.content;
-    return JSON.parse(response);
+    console.log(`🤖 [AI CALL] ✅ Response mil gaya! Length: ${response.length} chars`);
+    const parsed = JSON.parse(response);
+    console.log(`🤖 [AI CALL] ✅ Parsed JSON:`, JSON.stringify(parsed).substring(0, 100));
+    return parsed;
   } catch (error) {
-    console.error('AI call error:', error);
+    console.error(`🤖 [AI CALL] ❌ Error aaya bhai:`, error.message);
+    console.error(`🤖 [AI CALL] Full error:`, error);
     return null;
   }
 };
 
 // Generate welcome message for login
 const generateWelcomeMessage = async (user) => {
+  console.log(`🤖 [WELCOME] User login: ${user.name}`);
   const aiResponse = await callAI({
     user,
     reason: 'login',
@@ -71,11 +86,12 @@ const generateWelcomeMessage = async (user) => {
   });
 
   if (aiResponse && aiResponse.message) {
+    console.log(`🤖 [WELCOME] ✅ AI message mil gaya: ${aiResponse.message.substring(0, 50)}...`);
     return aiResponse.message;
   }
 
-  // Fallback
-  return `Welcome to FaltuVerse, ${user.name}! Ready for some pointless fun? 🎉`;
+  console.log(`🤖 [WELCOME] ⚠️ AI response nahi mila - fallback use kar rahe hain`);
+  return `Arre ${user.name}! FaltuVerse mein welcome bhai! Kuch faltu karte hain? 🎉`;
 };
 
 // Generate idle engagement
@@ -94,7 +110,7 @@ const generateIdleEngagement = async (user, appState = {}) => {
     };
   }
 
-  // Fallback
+  console.log(`🤖 [IDLE] ⚠️ AI response nahi mila - fallback use kar rahe hain`);
   return {
     type: 'popup',
     content: 'Bhai kidhar so gaya? Chal kuch faltu karte hain!'

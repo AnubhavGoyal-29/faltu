@@ -23,6 +23,7 @@ const shouldAIIntervene = (messages, lastMessageTime) => {
 
 // Generate and return AI chat message
 const generateAIChatMessage = async (roomId, roomName, recentMessages = []) => {
+  console.log(`🤖 [CHAT BOT] Room: ${roomName}, Messages: ${recentMessages.length}`);
   try {
     // Get context from recent messages
     const chatContext = {
@@ -31,6 +32,7 @@ const generateAIChatMessage = async (roomId, roomName, recentMessages = []) => {
     };
 
     // Generate AI response
+    console.log(`🤖 [CHAT BOT] AI ko call kar rahe hain...`);
     const aiResponse = await generateChatResponse(
       { name: AI_BOT_NAME },
       chatContext,
@@ -38,6 +40,7 @@ const generateAIChatMessage = async (roomId, roomName, recentMessages = []) => {
     );
 
     if (aiResponse && aiResponse.shouldSend && aiResponse.message) {
+      console.log(`🤖 [CHAT BOT] ✅ AI message generate hua: ${aiResponse.message.substring(0, 50)}...`);
       return {
         message_id: `ai_${Date.now()}`,
         room_id: roomId,
@@ -51,9 +54,11 @@ const generateAIChatMessage = async (roomId, roomName, recentMessages = []) => {
         created_at: new Date(),
         isAI: true
       };
+    } else {
+      console.log(`🤖 [CHAT BOT] ⚠️ AI response nahi mila ya shouldSend false hai`);
     }
   } catch (error) {
-    console.error('AI chat generation error:', error);
+    console.error(`🤖 [CHAT BOT] ❌ Error aaya bhai:`, error.message);
   }
 
   return null;
@@ -81,9 +86,11 @@ const processChatRoomForAI = async (roomId, roomName, io) => {
 
     // Check if AI should intervene
     if (shouldAIIntervene(recentMessages, lastMessageTime)) {
+      console.log(`🤖 [CHAT BOT] ✅ Intervention zaroori hai - AI message generate kar rahe hain`);
       const aiMessage = await generateAIChatMessage(roomId, roomName, recentMessages.reverse());
 
       if (aiMessage) {
+        console.log(`🤖 [CHAT BOT] ✅ Room ${roomId} mein message broadcast kar rahe hain`);
         // Broadcast AI message to room
         io.to(`room_${roomId}`).emit('new_message', {
           ...aiMessage,
@@ -93,10 +100,14 @@ const processChatRoomForAI = async (roomId, roomName, io) => {
             profile_photo: null
           }
         });
+      } else {
+        console.log(`🤖 [CHAT BOT] ⚠️ AI message generate nahi hua`);
       }
+    } else {
+      console.log(`🤖 [CHAT BOT] ℹ️ Intervention zaroori nahi hai`);
     }
   } catch (error) {
-    console.error('AI chat room processing error:', error);
+    console.error(`🤖 [CHAT BOT] ❌ Room processing error:`, error.message);
   }
 };
 

@@ -36,21 +36,26 @@ const runMinuteLuckyDraw = async () => {
     const activeUsers = await getRandomActiveUsers();
 
     if (activeUsers.length === 0) {
-      return {
-        shouldRun: false,
-        message: "Koi user nahi hai abhi...",
-        type: 'no_users'
-      };
+    console.log(`🎰 [MINUTE DRAW] ⚠️ Koi user nahi hai abhi...`);
+    return {
+      shouldRun: false,
+      message: "Koi user nahi hai abhi...",
+      type: 'no_users'
+    };
     }
 
     // 70% chance to run lucky draw
     if (Math.random() > 0.7) {
+      const msg = bakchodMessages[Math.floor(Math.random() * bakchodMessages.length)];
+      console.log(`🎰 [MINUTE DRAW] 💬 Bakchod message (30% chance): ${msg}`);
       return {
         shouldRun: false,
-        message: bakchodMessages[Math.floor(Math.random() * bakchodMessages.length)],
+        message: msg,
         type: 'skip'
       };
     }
+    
+    console.log(`🎰 [MINUTE DRAW] 🎲 Winner select kar rahe hain... (70% chance)`);
 
     // Randomly pick a winner
     const randomIndex = Math.floor(Math.random() * activeUsers.length);
@@ -69,6 +74,8 @@ const runMinuteLuckyDraw = async () => {
     await addPoints(winner.user_id, rewardPoints, 'minute_lucky_draw', winner, {
       draw_id: draw.draw_id
     });
+
+    console.log(`🎰 [MINUTE DRAW] ✅ ${winner.name} ko ${rewardPoints} points mil gaye!`);
 
     // Random bakchod message
     const messages = [
@@ -93,7 +100,7 @@ const runMinuteLuckyDraw = async () => {
       timestamp: draw.timestamp
     };
   } catch (error) {
-    console.error('Minute lucky draw error:', error);
+    console.error('🎰 [MINUTE DRAW] ❌ Error aaya bhai:', error.message);
     return {
       shouldRun: false,
       message: "Lucky draw error ho gaya...",

@@ -58,20 +58,22 @@ app.set('io', io);
 
 // Schedule hourly lucky draw (original)
 cron.schedule('0 * * * *', async () => {
-  console.log('Running hourly lucky draw...');
+  console.log('🎰 [LUCKY DRAW] Hourly draw chala rahe hain...');
   try {
     const result = await runLuckyDraw();
     if (result) {
-      console.log(`Hourly lucky draw winner: ${result.winner.name} - ${result.reward_points} points`);
+      console.log(`🎰 [LUCKY DRAW] ✅ Winner: ${result.winner.name} - ${result.reward_points} points mil gaye!`);
       io.emit('lucky_draw_winner', {
         winner: result.winner,
         reward_points: result.reward_points,
         timestamp: result.draw.timestamp,
         type: 'hourly'
       });
+    } else {
+      console.log(`🎰 [LUCKY DRAW] ⚠️ Koi winner nahi mila`);
     }
   } catch (error) {
-    console.error('Hourly lucky draw error:', error);
+    console.error('🎰 [LUCKY DRAW] ❌ Error aaya bhai:', error.message);
   }
 });
 
@@ -81,7 +83,7 @@ cron.schedule('* * * * *', async () => {
     const result = await runMinuteLuckyDraw();
     
     if (result.shouldRun && result.winner) {
-      console.log(`Minute lucky draw: ${result.winner.name} - ${result.reward_points} points`);
+      console.log(`🎰 [MINUTE DRAW] ✅ Winner: ${result.winner.name} - ${result.reward_points} points!`);
       // Broadcast to all connected clients
       io.emit('minute_lucky_draw', {
         winner: result.winner,
@@ -91,6 +93,7 @@ cron.schedule('* * * * *', async () => {
         type: 'minute'
       });
     } else if (result.message) {
+      console.log(`🎰 [MINUTE DRAW] 💬 Bakchod message: ${result.message}`);
       // Broadcast bakchod message even if no winner
       io.emit('minute_lucky_draw_message', {
         message: result.message,
@@ -98,7 +101,7 @@ cron.schedule('* * * * *', async () => {
       });
     }
   } catch (error) {
-    console.error('Minute lucky draw error:', error);
+    console.error('🎰 [MINUTE DRAW] ❌ Error:', error.message);
   }
 });
 
@@ -126,17 +129,18 @@ const PORT = process.env.PORT || 5000;
 
 sequelize.authenticate()
   .then(() => {
-    console.log('Database connection established successfully.');
+    console.log('✅ Database connect ho gaya bhai!');
     return sequelize.sync({ alter: false }); // Use migrations instead of sync in production
   })
   .then(() => {
     server.listen(PORT, () => {
-      console.log(`FaltuVerse server is running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🚀 FaltuVerse server chal raha hai port ${PORT} par`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🤖 AI Status: ${process.env.OPENAI_API_KEY ? '✅ Enabled' : '❌ Disabled'}`);
     });
   })
   .catch((error) => {
-    console.error('Unable to connect to the database:', error);
+    console.error('❌ Database connect nahi hua bhai:', error.message);
     process.exit(1);
   });
 

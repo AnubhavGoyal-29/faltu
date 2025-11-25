@@ -5,16 +5,22 @@ const { generateRewardSuggestion, isAIEnabled } = require('./aiDecisionEngine');
 const addPoints = async (userId, points, reason = '', user = null, context = {}) => {
   // Try AI reward suggestion if enabled and user provided
   if (isAIEnabled() && user && reason) {
+    console.log(`🤖 [REWARDS] User: ${user.name}, Reason: ${reason}, Original Points: ${points}`);
     try {
       const aiReward = await generateRewardSuggestion(user, reason, context);
       if (aiReward && aiReward.points !== undefined) {
+        console.log(`🤖 [REWARDS] ✅ AI suggested: ${aiReward.points} points (was ${points})`);
         points = aiReward.points;
         reason = aiReward.reason || reason;
+      } else {
+        console.log(`🤖 [REWARDS] ⚠️ AI suggestion nahi mila - original points use kar rahe hain`);
       }
     } catch (error) {
-      console.error('AI reward suggestion error:', error);
+      console.error(`🤖 [REWARDS] ❌ Error:`, error.message);
       // Continue with original points
     }
+  } else {
+    console.log(`🤖 [REWARDS] ℹ️ AI disabled ya user/reason nahi hai - original points: ${points}`);
   }
 
   const userPoints = await UserPoints.findOne({ where: { user_id: userId } });
