@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import { ChaosProvider } from './context/ChaosContext'
 import { UIChaosProvider } from './context/UIChaosContext'
 import Login from './pages/Login'
+import Admin from './pages/Admin'
 import Dashboard from './pages/Dashboard'
 import ChatRoom from './pages/ChatRoom'
 import Jokes from './pages/Jokes'
@@ -30,6 +31,7 @@ function App() {
           <UIChaosProvider>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={<Admin />} />
               <Route
                 path="/dashboard"
                 element={

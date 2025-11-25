@@ -94,13 +94,17 @@ const Dashboard = () => {
         }
       } catch (drawError) {
         // No lucky draw yet, that's okay
+        console.log('No lucky draw data available')
         setLastDraw(null)
       }
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
-      // Set defaults on error
-      setPoints(0)
-      setLoginStreak(0)
+      // Don't reset to 0 on error - keep previous values
+      // Only set defaults if this is first load
+      if (points === 0 && loginStreak === 0) {
+        setPoints(0)
+        setLoginStreak(0)
+      }
       setLastDraw(null)
     }
   }

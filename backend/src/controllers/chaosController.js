@@ -18,8 +18,8 @@ const triggerChaos = async (req, res) => {
       message: 'Chaos triggered successfully! All users will see it.'
     });
   } catch (error) {
-    console.error('Trigger chaos error:', error);
-    res.status(500).json({ error: error.message || 'Failed to trigger chaos' });
+    console.error('💥 [CHAOS] Trigger chaos error:', error);
+    res.status(500).json({ error: error.message || 'Chaos trigger nahi hua bhai! Try again.' });
   }
 };
 
