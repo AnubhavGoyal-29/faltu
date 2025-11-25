@@ -11,6 +11,14 @@ import Tambola from './pages/Tambola'
 import Games from './pages/Games'
 import BakchodiChallenge from './pages/games/BakchodiChallenge'
 import Debate from './pages/games/Debate'
+import MemeBattle from './pages/games/MemeBattle'
+import WheelSpin from './pages/games/WheelSpin'
+import FuturePrediction from './pages/games/FuturePrediction'
+import TapGame from './pages/games/TapGame'
+import RunawayButton from './pages/games/RunawayButton'
+import DareMachine from './pages/games/DareMachine'
+import RoastMe from './pages/games/RoastMe'
+import RoomChaos from './pages/games/RoomChaos'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
@@ -83,6 +91,70 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Debate />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/meme"
+                element={
+                  <ProtectedRoute>
+                    <MemeBattle />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/wheel"
+                element={
+                  <ProtectedRoute>
+                    <WheelSpin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/future"
+                element={
+                  <ProtectedRoute>
+                    <FuturePrediction />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/tap"
+                element={
+                  <ProtectedRoute>
+                    <TapGame />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/runaway"
+                element={
+                  <ProtectedRoute>
+                    <RunawayButton />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/dare"
+                element={
+                  <ProtectedRoute>
+                    <DareMachine />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/roast"
+                element={
+                  <ProtectedRoute>
+                    <RoastMe />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/chaos"
+                element={
+                  <ProtectedRoute>
+                    <RoomChaos />
                   </ProtectedRoute>
                 }
               />
