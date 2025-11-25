@@ -9,6 +9,17 @@ const { initializeChatSocket } = require('./sockets/chatSocket');
 const { runLuckyDraw } = require('./services/luckyDrawService');
 const { runMinuteLuckyDraw } = require('./services/minuteLuckyDrawService');
 const { generateCronEventSuggestion } = require('./services/aiDecisionEngine');
+const {
+  createTambolaRoom,
+  startTambolaGame,
+  callNextNumber,
+  completeGame,
+  getActiveRoom
+} = require('./services/tambolaService');
+const {
+  createSystemUsers,
+  joinSystemUsersToTambola
+} = require('./services/systemUsersService');
 const cron = require('node-cron');
 
 // Import routes
@@ -18,6 +29,7 @@ const jokeRoutes = require('./routes/jokeRoutes');
 const luckyDrawRoutes = require('./routes/luckyDrawRoutes');
 const chaosRoutes = require('./routes/chaosRoutes');
 const wordleRoutes = require('./routes/wordleRoutes');
+const tambolaRoutes = require('./routes/tambolaRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +61,7 @@ app.use('/api/jokes', jokeRoutes);
 app.use('/api/lucky-draws', luckyDrawRoutes);
 app.use('/api/chaos', chaosRoutes);
 app.use('/api/wordle', wordleRoutes);
+app.use('/api/tambola', tambolaRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -155,13 +168,26 @@ cron.schedule('*/2 * * * *', async () => {
   }
 });
 
-// Database connection and server start
-const PORT = process.env.PORT || 5000;
+// Tambola game management
+let currentTambolaRoom = null;
+let tambolaNumberInterval = null;
+let tambolaGameActive = false;
 
+// Initialize system users on server start
 sequelize.authenticate()
-  .then(() => {
+  .then(async () => {
     console.log('✅ Database connect ho gaya bhai!');
-    return sequelize.sync({ alter: false }); // Use migrations instead of sync in production
+    await sequelize.sync({ alter: false });
+    
+    // Create system users
+    await createSystemUsers();
+    
+    // Start first tambola game after 5 minutes
+    setTimeout(async () => {
+      await startNewTambolaGame();
+    }, 5 * 60 * 1000); // 5 minutes
+    
+    console.log('🎲 [TAMBOLA] First game 5 minutes mein start hogi!');
   })
   .then(() => {
     server.listen(PORT, () => {
@@ -174,6 +200,126 @@ sequelize.authenticate()
     console.error('❌ Database connect nahi hua bhai:', error.message);
     process.exit(1);
   });
+
+// Start new tambola game
+const startNewTambolaGame = async () => {
+  try {
+    if (tambolaGameActive) {
+      console.log('🎲 [TAMBOLA] Game already active hai!');
+      return;
+    }
+    
+    console.log('🎲 [TAMBOLA] Naya game start kar rahe hain...');
+    
+    // Create new room
+    const room = await createTambolaRoom();
+    currentTambolaRoom = room;
+    
+    // Join system users
+    await joinSystemUsersToTambola(room.room_id);
+    
+    // Broadcast room created
+    io.emit('tambola_room_created', {
+      room_id: room.room_id,
+      status: 'waiting',
+      message: 'Naya tambola room open hai! Register karo!'
+    });
+    
+    // Wait 30 seconds for registrations, then start
+    setTimeout(async () => {
+      const result = await startTambolaGame(room.room_id);
+      
+      if (result.success) {
+        tambolaGameActive = true;
+        
+        // Broadcast game started
+        io.emit('tambola_game_started', {
+          room_id: room.room_id,
+          message: 'Tambola game start ho gayi!'
+        });
+        
+        // Start calling numbers every 20 seconds
+        tambolaNumberInterval = setInterval(async () => {
+          const numberResult = await callNextNumber(room.room_id);
+          
+          if (numberResult.success) {
+            // Broadcast new number
+            io.emit('tambola_number_called', {
+              room_id: room.room_id,
+              number: numberResult.number,
+              called_numbers: numberResult.calledNumbers
+            });
+            
+            // Check for winners
+            if (numberResult.winners && numberResult.winners.length > 0) {
+              for (const winner of numberResult.winners) {
+                io.emit('tambola_winner', {
+                  room_id: room.room_id,
+                  winner: winner,
+                  message: `${winner.name} ne ${winner.win_type} complete kar liya! 🎉`
+                });
+                
+                // If full house, end game
+                if (winner.win_type === 'Full House') {
+                  await completeTambolaGame(room.room_id, winner.user_id);
+                }
+              }
+            }
+          } else {
+            // All numbers called or game ended
+            if (numberResult.message.includes('Sab numbers')) {
+              await completeTambolaGame(room.room_id, null);
+            }
+          }
+        }, 20000); // 20 seconds
+      }
+    }, 30000); // 30 seconds wait
+    
+  } catch (error) {
+    console.error('🎲 [TAMBOLA] Start game error:', error);
+  }
+};
+
+// Complete tambola game
+const completeTambolaGame = async (roomId, winnerId) => {
+  try {
+    if (tambolaNumberInterval) {
+      clearInterval(tambolaNumberInterval);
+      tambolaNumberInterval = null;
+    }
+    
+    tambolaGameActive = false;
+    await completeGame(roomId, winnerId);
+    
+    // Broadcast game completed
+    io.emit('tambola_game_completed', {
+      room_id: roomId,
+      winner_user_id: winnerId,
+      message: 'Game complete ho gayi!'
+    });
+    
+    currentTambolaRoom = null;
+    
+    // Start next game after 5 minutes
+    setTimeout(() => {
+      startNewTambolaGame();
+    }, 5 * 60 * 1000);
+    
+    console.log('🎲 [TAMBOLA] Game complete! Next game 5 minutes mein start hogi.');
+  } catch (error) {
+    console.error('🎲 [TAMBOLA] Complete game error:', error);
+  }
+};
+
+// Schedule tambola games every 5 minutes (backup scheduler)
+cron.schedule('*/5 * * * *', async () => {
+  if (!tambolaGameActive && !currentTambolaRoom) {
+    await startNewTambolaGame();
+  }
+});
+
+// Database connection and server start
+const PORT = process.env.PORT || 5000;
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {

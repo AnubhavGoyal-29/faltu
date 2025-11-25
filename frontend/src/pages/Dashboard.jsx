@@ -236,6 +236,16 @@ const Dashboard = () => {
               Play Wordle 🎯
             </FloatingButton>
           </div>
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform">
+            <h3 className="text-2xl font-black mb-4 text-gray-800">🎲 Tambola Game</h3>
+            <p className="text-gray-600 mb-4">Har 5 minute mein naya game! Register karo aur jeeto!</p>
+            <FloatingButton
+              onClick={() => navigate('/tambola')}
+              className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white"
+            >
+              Play Tambola 🎲
+            </FloatingButton>
+          </div>
         </div>
 
         {/* Last Lucky Draw */}
