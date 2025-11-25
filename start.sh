@@ -91,17 +91,17 @@ echo ""
 echo "✅ Setup complete!"
 echo ""
 
-# Kill any existing processes on ports 5000 and 5173
+# Kill any existing processes on ports 5000 and 3000
 echo "🛑 Stopping any existing servers..."
 lsof -ti:5000 | xargs kill -9 2>/dev/null || true
-lsof -ti:5173 | xargs kill -9 2>/dev/null || true
+lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 sleep 2
 
 echo ""
 echo "🚀 Starting servers..."
 echo ""
 echo "Backend will start on: http://localhost:5000"
-echo "Frontend will start on: http://localhost:5173"
+echo "Frontend will start on: http://localhost:3000"
 echo ""
 echo "Press Ctrl+C to stop all servers"
 echo ""
