@@ -4,49 +4,41 @@ import { useAuth } from '../context/AuthContext'
 import { triggerConfettiBurst } from '../utils/confettiBlast'
 import LuckyDrawCountdown from './LuckyDrawCountdown'
 
-const bakchodMessages = [
-  "Kuch nahi hua...",
-  "Abhi kuch nahi...",
-  "Wait kar rahe hain...",
-  "Koi winner nahi...",
-  "Next time pakka!",
-  "Try again!",
-  "Better luck next time!",
-  "Kuch random ho sakta hai..."
-]
-
 const LuckyDrawTimer = () => {
   const { token } = useAuth()
-  const [timeLeft, setTimeLeft] = useState(60)
-  const [message, setMessage] = useState('')
-  const [showMessage, setShowMessage] = useState(false)
-  const [winner, setWinner] = useState(null)
+  const [timeLeft, setTimeLeft] = useState(300) // 5 minutes default
+  const [showCountdown, setShowCountdown] = useState(false)
   const [socket, setSocket] = useState(null)
 
   useEffect(() => {
     if (!token) return
 
-    const newSocket = io(import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000', {
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+    const socketUrl = baseUrl.replace('/api', '').replace(/\/$/, '')
+
+    const newSocket = io(socketUrl, {
       auth: { token }
     })
 
-    newSocket.on('minute_lucky_draw', (data) => {
-      setWinner(data.winner)
-      setMessage(data.message)
-      setShowMessage(true)
-      triggerConfettiBurst()
-      setTimeout(() => {
-        setShowMessage(false)
-        setWinner(null)
-      }, 5000)
+    // Listen for backend-driven timer updates
+    newSocket.on('lucky_draw_timer', (data) => {
+      setTimeLeft(data.timeLeft)
     })
 
-    newSocket.on('minute_lucky_draw_message', (data) => {
-      setMessage(data.message)
-      setShowMessage(true)
-      setTimeout(() => {
-        setShowMessage(false)
-      }, 3000)
+    // Listen for draw results
+    newSocket.on('lucky_draw_result', (data) => {
+      if (data.type === 'winner') {
+        setShowCountdown(true)
+        triggerConfettiBurst()
+        setTimeout(() => {
+          setShowCountdown(false)
+        }, 8000)
+      } else {
+        setShowCountdown(true)
+        setTimeout(() => {
+          setShowCountdown(false)
+        }, 5000)
+      }
     })
 
     setSocket(newSocket)
@@ -56,22 +48,7 @@ const LuckyDrawTimer = () => {
     }
   }, [token])
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          return 60 // Reset to 60
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
-
   // Show countdown when 10 seconds left
-  const [showCountdown, setShowCountdown] = useState(false)
-
   useEffect(() => {
     if (timeLeft <= 10 && timeLeft > 0 && !showCountdown) {
       setShowCountdown(true)
@@ -80,6 +57,12 @@ const LuckyDrawTimer = () => {
       setShowCountdown(false)
     }
   }, [timeLeft, showCountdown])
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   if (showCountdown && timeLeft <= 10) {
     return (
@@ -92,7 +75,7 @@ const LuckyDrawTimer = () => {
               <div className="text-2xl mb-2">🎰</div>
               <div className="text-sm text-gray-600 mb-1">Next Lucky Draw</div>
               <div className="text-3xl font-black text-purple-600 mb-2">
-                {timeLeft}s
+                {formatTime(timeLeft)}
               </div>
             </div>
           </div>
@@ -108,28 +91,11 @@ const LuckyDrawTimer = () => {
           <div className="text-2xl mb-2">🎰</div>
           <div className="text-sm text-gray-600 mb-1">Next Lucky Draw</div>
           <div className="text-3xl font-black text-purple-600 mb-2">
-            {timeLeft}s
+            {formatTime(timeLeft)}
           </div>
-          
-          {showMessage && (
-            <div className="mt-2 p-2 bg-yellow-100 rounded-lg animate-bounce-silly">
-              <p className="text-xs font-bold text-gray-800">
-                {message}
-              </p>
-              {winner && (
-                <div className="mt-1 flex items-center justify-center gap-2">
-                  {winner.profile_photo && (
-                    <img 
-                      src={winner.profile_photo} 
-                      alt={winner.name}
-                      className="w-6 h-6 rounded-full"
-                    />
-                  )}
-                  <span className="text-xs font-bold text-purple-600">
-                    {winner.name}
-                  </span>
-                </div>
-              )}
+          {timeLeft <= 60 && (
+            <div className="text-xs text-red-500 font-bold animate-pulse">
+              Abhi Abhi!
             </div>
           )}
         </div>
@@ -139,4 +105,3 @@ const LuckyDrawTimer = () => {
 }
 
 export default LuckyDrawTimer
-

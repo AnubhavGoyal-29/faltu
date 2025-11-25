@@ -1,32 +1,51 @@
-const { triggerChaosEvent, getRecentChaosEvents } = require('../services/chaosService');
+const { triggerChaosEvent, returnChaos, getRecentChaosEvents } = require('../services/chaosService');
 const { User } = require('../models');
 
 // Trigger chaos event
 const triggerChaos = async (req, res) => {
   try {
-    const userId = req.user.user_id;
-    const event = await triggerChaosEvent(userId, req.user);
-
-    // Broadcast chaos event to all connected clients
+    const userId = req.user.userId;
+    const user = await User.findByPk(userId);
+    
+    // Get io instance from app
     const io = req.app.get('io');
-    if (io) {
-      io.emit('chaos_event', {
-        event_type: event.event_type,
-        event_data: event.event_data,
-        triggered_by: {
-          user_id: req.user.user_id,
-          name: req.user.name
-        }
-      });
-    }
-
+    
+    const result = await triggerChaosEvent(userId, user, io);
+    
     res.json({
       success: true,
-      event: event
+      event: result,
+      message: 'Chaos triggered successfully! All users will see it.'
     });
   } catch (error) {
     console.error('Trigger chaos error:', error);
-    res.status(500).json({ error: 'Failed to trigger chaos event' });
+    res.status(500).json({ error: error.message || 'Failed to trigger chaos' });
+  }
+};
+
+// Return chaos to original creator
+const returnChaosToCreator = async (req, res) => {
+  try {
+    const returnerUserId = req.user.userId;
+    const { originalEventId } = req.body;
+    
+    if (!originalEventId) {
+      return res.status(400).json({ error: 'originalEventId required' });
+    }
+    
+    // Get io instance from app
+    const io = req.app.get('io');
+    
+    const result = await returnChaos(returnerUserId, originalEventId, io);
+    
+    res.json({
+      success: true,
+      event: result,
+      message: 'Chaos returned successfully!'
+    });
+  } catch (error) {
+    console.error('Return chaos error:', error);
+    res.status(500).json({ error: error.message || 'Failed to return chaos' });
   }
 };
 
@@ -35,7 +54,7 @@ const getRecentChaos = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
     const events = await getRecentChaosEvents(limit);
-
+    
     res.json({
       events: events.map(event => ({
         event_id: event.event_id,
@@ -57,6 +76,6 @@ const getRecentChaos = async (req, res) => {
 
 module.exports = {
   triggerChaos,
+  returnChaosToCreator,
   getRecentChaos
 };
-

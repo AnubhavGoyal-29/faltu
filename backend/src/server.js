@@ -77,31 +77,58 @@ cron.schedule('0 * * * *', async () => {
   }
 });
 
-// Schedule minute lucky draw (every minute)
-cron.schedule('* * * * *', async () => {
+// Backend-driven lucky draw timer (every 5 minutes, persistent)
+let luckyDrawTimer = 300; // 5 minutes in seconds
+let luckyDrawStartTime = Date.now();
+
+// Update timer every second and broadcast
+setInterval(() => {
+  const elapsed = Math.floor((Date.now() - luckyDrawStartTime) / 1000);
+  luckyDrawTimer = Math.max(0, 300 - elapsed);
+  
+  // Broadcast timer to all clients
+  io.emit('lucky_draw_timer', {
+    timeLeft: luckyDrawTimer,
+    nextDrawTime: luckyDrawStartTime + 300000
+  });
+  
+  // Reset timer when it reaches 0
+  if (luckyDrawTimer <= 0) {
+    luckyDrawStartTime = Date.now();
+    luckyDrawTimer = 300;
+  }
+}, 1000);
+
+// Schedule 5-minute lucky draw
+cron.schedule('*/5 * * * *', async () => {
   try {
+    console.log(`🎰 [LUCKY DRAW] 5-minute draw chala rahe hain...`);
     const result = await runMinuteLuckyDraw();
     
     if (result.shouldRun && result.winner) {
-      console.log(`🎰 [MINUTE DRAW] ✅ Winner: ${result.winner.name} - ${result.reward_points} points!`);
+      console.log(`🎰 [LUCKY DRAW] ✅ Winner: ${result.winner.name} - ${result.reward_points} points!`);
       // Broadcast to all connected clients
-      io.emit('minute_lucky_draw', {
+      io.emit('lucky_draw_result', {
         winner: result.winner,
         reward_points: result.reward_points,
         message: result.message,
         timestamp: result.timestamp,
-        type: 'minute'
+        type: 'winner'
       });
     } else if (result.message) {
-      console.log(`🎰 [MINUTE DRAW] 💬 Bakchod message: ${result.message}`);
-      // Broadcast bakchod message even if no winner
-      io.emit('minute_lucky_draw_message', {
+      console.log(`🎰 [LUCKY DRAW] 💬 Message: ${result.message}`);
+      // Broadcast message
+      io.emit('lucky_draw_result', {
         message: result.message,
-        type: result.type || 'info'
+        type: result.type || 'message'
       });
     }
+    
+    // Reset timer
+    luckyDrawStartTime = Date.now();
+    luckyDrawTimer = 300;
   } catch (error) {
-    console.error('🎰 [MINUTE DRAW] ❌ Error:', error.message);
+    console.error('🎰 [LUCKY DRAW] ❌ Error:', error.message);
   }
 });
 

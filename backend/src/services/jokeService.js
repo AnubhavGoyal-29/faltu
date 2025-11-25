@@ -159,35 +159,86 @@ const hinglishJokes = [
   }
 ];
 
-// Get random joke
+// Track jokes shown to users (in-memory, reset on server restart)
+const userJokeHistory = new Map();
+
+// Get random joke (ensures no repetition for user)
 const getRandomJoke = async (user = null) => {
+  const userId = user?.user_id || 'anonymous';
+  
   // Try AI first if enabled
   if (isAIEnabled() && user) {
     try {
       console.log(`🤖 [JOKES] AI se joke generate kar rahe hain...`);
+      
+      // Get user's joke history
+      const userHistory = userJokeHistory.get(userId) || [];
+      const recentJokes = userHistory.slice(-10).join(', ');
+      
       const aiResponse = await callAI({
         user,
         reason: 'joke',
-        appState: { action: 'get_joke' }
+        appState: { 
+          action: 'get_joke',
+          recentJokes: recentJokes || 'none',
+          avoidRepetition: true
+        }
       });
 
-      if (aiResponse && aiResponse.joke) {
+      if (aiResponse && (aiResponse.joke || aiResponse.punchline || aiResponse.content)) {
+        const jokeText = aiResponse.joke || aiResponse.punchline || aiResponse.content;
         console.log(`🤖 [JOKES] ✅ AI joke mil gaya!`);
-        return {
+        
+        const joke = {
           setup: aiResponse.setup || '',
-          punchline: aiResponse.joke || aiResponse.punchline || aiResponse.content,
+          punchline: jokeText,
           category: aiResponse.category || 'random',
           source: 'ai'
         };
+        
+        // Track this joke
+        if (!userJokeHistory.has(userId)) {
+          userJokeHistory.set(userId, []);
+        }
+        userJokeHistory.get(userId).push(jokeText);
+        if (userJokeHistory.get(userId).length > 50) {
+          userJokeHistory.get(userId).shift(); // Keep last 50
+        }
+        
+        return joke;
       }
     } catch (error) {
       console.error(`🤖 [JOKES] ❌ AI error:`, error.message);
     }
   }
 
-  // Fallback to random Hinglish joke
+  // Fallback to random Hinglish joke (avoid repetition)
   console.log(`🤖 [JOKES] ⚠️ AI nahi mila - random Hinglish joke use kar rahe hain`);
-  const randomJoke = hinglishJokes[Math.floor(Math.random() * hinglishJokes.length)];
+  
+  const userHistory = userJokeHistory.get(userId) || [];
+  let availableJokes = hinglishJokes.filter(j => {
+    const jokeText = j.setup + ' ' + j.punchline;
+    return !userHistory.includes(jokeText);
+  });
+  
+  // If all jokes seen, reset history for this user
+  if (availableJokes.length === 0) {
+    userJokeHistory.set(userId, []);
+    availableJokes = hinglishJokes;
+  }
+  
+  const randomJoke = availableJokes[Math.floor(Math.random() * availableJokes.length)];
+  const jokeText = randomJoke.setup + ' ' + randomJoke.punchline;
+  
+  // Track this joke
+  if (!userJokeHistory.has(userId)) {
+    userJokeHistory.set(userId, []);
+  }
+  userJokeHistory.get(userId).push(jokeText);
+  if (userJokeHistory.get(userId).length > 50) {
+    userJokeHistory.get(userId).shift();
+  }
+  
   return {
     ...randomJoke,
     source: 'database'

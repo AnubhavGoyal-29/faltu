@@ -1,6 +1,7 @@
-const { ChaosEvent } = require('../models');
+const { ChaosEvent, User } = require('../models');
 const { addPoints } = require('./pointsService');
 const { generateChaosAction, isAIEnabled } = require('./aiDecisionEngine');
+const { getRandomChaosAnimation, getChaosAnimationConfig, CHAOS_ANIMATION_TYPES } = require('./chaosAnimations');
 
 // Chaos event types
 const CHAOS_EVENT_TYPES = {
@@ -130,6 +131,7 @@ const getRecentChaosEvents = async (limit = 10) => {
 
 module.exports = {
   triggerChaosEvent,
+  returnChaos,
   getRecentChaosEvents,
   CHAOS_EVENT_TYPES
 };
