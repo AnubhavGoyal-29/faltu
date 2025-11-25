@@ -21,8 +21,8 @@ const getProfile = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ error: 'Failed to get profile' });
+    console.error('👤 [USER] Get profile error:', error);
+    res.status(500).json({ error: 'Profile fetch nahi hua bhai! Try again.' });
   }
 };
 

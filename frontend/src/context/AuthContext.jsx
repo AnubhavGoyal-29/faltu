@@ -38,11 +38,19 @@ export const AuthProvider = ({ children }) => {
   const fetchProfile = async () => {
     try {
       const response = await api.get('/users/profile')
-      setUser(response.data.user)
+      if (response.data && response.data.user) {
+        setUser(response.data.user)
+      }
       setLoading(false)
     } catch (error) {
-      console.error('Failed to fetch profile:', error)
-      logout()
+      console.error('🔐 [AUTH] Failed to fetch profile:', error)
+      // Only logout if it's an auth error, not a network error
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        logout()
+      } else {
+        // Network error - keep user logged in, just set loading to false
+        setLoading(false)
+      }
     }
   }
 
