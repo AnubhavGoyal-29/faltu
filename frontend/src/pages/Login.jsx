@@ -35,7 +35,7 @@ const Login = () => {
       
       console.log('📍 Moving button to:', { x: newX, y: newY })
       setButtonPosition({ x: newX, y: newY })
-    }, 100) // Move every 100ms for smoother movement
+    }, 400) // Move every 400ms - slower movement
 
     // Stop moving after 5 seconds
     const stopTimer = setTimeout(() => {
@@ -72,7 +72,7 @@ const Login = () => {
         left: `${buttonPosition.x}px`,
         top: `${buttonPosition.y}px`,
         transform: 'translate(-50%, -50%)',
-        transition: 'none',
+        transition: 'left 0.3s ease, top 0.3s ease', // Smooth transition
         zIndex: 1000,
         pointerEvents: 'auto'
       }
