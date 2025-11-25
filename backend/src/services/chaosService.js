@@ -129,12 +129,9 @@ const returnChaos = async (returnerUserId, originalEventId, io = null) => {
     const returner = await UserModel.findByPk(returnerUserId);
     const originalCreator = await UserModel.findByPk(originalEvent.triggered_by_user_id);
 
-    if (!originalEvent) {
-      throw new Error('Original chaos event not found');
+    if (!returner || !originalCreator) {
+      throw new Error('User not found');
     }
-
-    const returner = await User.findByPk(returnerUserId);
-    const originalCreator = originalEvent.triggeredBy;
 
     // Create return chaos event
     const returnAnimationType = getRandomChaosAnimation();
