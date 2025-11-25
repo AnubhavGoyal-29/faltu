@@ -9,6 +9,8 @@ import Jokes from './pages/Jokes'
 import Wordle from './pages/Wordle'
 import Tambola from './pages/Tambola'
 import Games from './pages/Games'
+import BakchodiChallenge from './pages/games/BakchodiChallenge'
+import Debate from './pages/games/Debate'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
