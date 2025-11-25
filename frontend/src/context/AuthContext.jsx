@@ -75,10 +75,16 @@ export const AuthProvider = ({ children }) => {
         alert('Login failed. Please try again.')
       }
     },
-    onError: () => {
-      console.error('Google login failed')
-      alert('Google login failed. Please try again.')
-    }
+    onError: (error) => {
+      console.error('Google login failed:', error)
+      if (error.error === 'redirect_uri_mismatch') {
+        alert('Redirect URI mismatch! Google Console mein http://localhost:5173 add karo.')
+      } else {
+        alert('Google login failed. Please try again.')
+      }
+    },
+    flow: 'auth-code', // Use authorization code flow
+    redirectUri: window.location.origin // Use current origin as redirect URI
   })
 
   const logout = () => {
