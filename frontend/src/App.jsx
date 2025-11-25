@@ -68,6 +68,22 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/games/bakchodi"
+                element={
+                  <ProtectedRoute>
+                    <BakchodiChallenge />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games/debate"
+                element={
+                  <ProtectedRoute>
+                    <Debate />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </UIChaosProvider>

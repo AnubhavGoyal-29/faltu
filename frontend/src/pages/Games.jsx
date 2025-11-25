@@ -121,7 +121,20 @@ const Games = () => {
 
   const handleGameClick = (gameId) => {
     triggerConfettiBurst()
-    navigate(`/games/${gameId}`)
+    // Map game IDs to routes
+    const routes = {
+      bakchodi: '/games/bakchodi',
+      debate: '/games/debate',
+      meme: '/games/meme',
+      wheel: '/games/wheel',
+      future: '/games/future',
+      tap: '/games/tap',
+      runaway: '/games/runaway',
+      dare: '/games/dare',
+      roast: '/games/roast',
+      chaos: '/games/chaos'
+    }
+    navigate(routes[gameId] || '/games')
   }
 
   return (
