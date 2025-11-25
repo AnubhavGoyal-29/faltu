@@ -116,6 +116,76 @@ const triggerChaosEvent = async (userId, user = null) => {
   };
 };
 
+// Return chaos (make the original creator suffer)
+const returnChaos = async (returnerUserId, originalEventId, io = null) => {
+  try {
+    const { User: UserModel } = require('../models');
+    const originalEvent = await ChaosEvent.findByPk(originalEventId);
+    
+    if (!originalEvent) {
+      throw new Error('Original chaos event not found');
+    }
+
+    const returner = await UserModel.findByPk(returnerUserId);
+    const originalCreator = await UserModel.findByPk(originalEvent.triggered_by_user_id);
+
+    if (!originalEvent) {
+      throw new Error('Original chaos event not found');
+    }
+
+    const returner = await User.findByPk(returnerUserId);
+    const originalCreator = originalEvent.triggeredBy;
+
+    // Create return chaos event
+    const returnAnimationType = getRandomChaosAnimation();
+    const returnAnimationConfig = getChaosAnimationConfig(returnAnimationType);
+
+    const returnEvent = await ChaosEvent.create({
+      triggered_by_user_id: returnerUserId,
+      event_type: 'return_chaos',
+      event_data: {
+        original_event_id: originalEventId,
+        animationType: returnAnimationType,
+        animationConfig: returnAnimationConfig,
+        message: `${returner.name} ne ${originalCreator.name} ko return chaos diya!`
+      }
+    });
+
+    // Award returner points
+    await addPoints(returnerUserId, 500, 'return_chaos');
+
+    // Broadcast return chaos specifically to original creator
+    if (io) {
+      // Send to original creator
+      io.to(`user_${originalCreator.user_id}`).emit('chaos_returned', {
+        event_id: returnEvent.event_id,
+        event_data: returnEvent.event_data,
+        returned_by: {
+          user_id: returner.user_id,
+          name: returner.name,
+          profile_photo: returner.profile_photo
+        },
+        message: `${returner.name} ne tumhe return chaos diya! Ab tum suffer karo! 😈`
+      });
+
+      // Broadcast to all about the return
+      io.emit('chaos_return_announcement', {
+        returner: returner.name,
+        victim: originalCreator.name,
+        message: `${returner.name} ne ${originalCreator.name} ko return chaos diya!`
+      });
+    }
+
+    return {
+      event_id: returnEvent.event_id,
+      success: true
+    };
+  } catch (error) {
+    console.error(`💥 [CHAOS] Return error:`, error.message);
+    throw error;
+  }
+};
+
 // Get recent chaos events
 const getRecentChaosEvents = async (limit = 10) => {
   return await ChaosEvent.findAll({
