@@ -94,7 +94,8 @@ const submitWordleGuess = async (userId, guess, user = null) => {
     success: true,
     correct: false,
     result: result,
-    message: 'Galat hai! Try again!'
+    message: 'Galat hai! Try again!',
+    correctWord: null // Don't reveal word yet
   };
 };
 

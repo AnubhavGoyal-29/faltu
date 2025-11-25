@@ -15,6 +15,7 @@ const Wordle = () => {
   const [gameLost, setGameLost] = useState(false)
   const [loading, setLoading] = useState(false)
   const [hint, setHint] = useState('')
+  const [correctWord, setCorrectWord] = useState('')
 
   const maxAttempts = 6
 
@@ -44,10 +45,19 @@ const Wordle = () => {
 
         if (response.data.correct) {
           setGameWon(true)
+          setCorrectWord(response.data.correctWord || '')
           triggerConfettiBurst()
           alert(response.data.message)
         } else if (attempts + 1 >= maxAttempts) {
           setGameLost(true)
+          // Get correct word when game is lost
+          try {
+            const dailyResponse = await api.get('/wordle/daily')
+            // We'll get the correct word from backend
+            fetchCorrectWord()
+          } catch (err) {
+            console.error('Failed to get correct word:', err)
+          }
         }
       }
     } catch (error) {

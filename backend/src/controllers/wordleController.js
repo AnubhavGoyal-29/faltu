@@ -35,16 +35,20 @@ const getHint = async (req, res) => {
   }
 };
 
-// Get daily word info (without revealing the word)
+// Get daily word info (reveals word only if game is lost)
 const getDailyInfo = async (req, res) => {
   try {
     const today = new Date();
     const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+    const revealWord = req.query.reveal === 'true'; // Only reveal if explicitly requested
+    
+    const dailyWord = getDailyWordForReveal();
     
     res.json({
       day: dayOfYear,
       wordLength: 5,
-      message: 'Aaj ka word 5 letters ka hai! Guess karo!'
+      message: 'Aaj ka word 5 letters ka hai! Guess karo!',
+      correctWord: revealWord ? dailyWord : null // Only reveal if game is lost
     });
   } catch (error) {
     console.error('Wordle info error:', error);
