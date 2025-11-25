@@ -29,7 +29,33 @@ const getLastDraw = async (req, res) => {
   }
 };
 
+// Get recent minute draws
+const getRecentDraws = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const draws = await getRecentMinuteDraws(limit);
+    
+    res.json({
+      draws: draws.map(draw => ({
+        draw_id: draw.draw_id,
+        winner: {
+          user_id: draw.winner.user_id,
+          name: draw.winner.name,
+          email: draw.winner.email,
+          profile_photo: draw.winner.profile_photo
+        },
+        reward_points: draw.reward_points,
+        timestamp: draw.timestamp
+      }))
+    });
+  } catch (error) {
+    console.error('Get recent draws error:', error);
+    res.status(500).json({ error: 'Failed to get recent draws' });
+  }
+};
+
 module.exports = {
-  getLastDraw
+  getLastDraw,
+  getRecentDraws
 };
 

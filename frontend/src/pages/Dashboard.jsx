@@ -8,6 +8,7 @@ import api from '../api/axios'
 import FloatingButton from '../components/FloatingButton'
 import FaltuPopup, { getRandomMessage } from '../components/FaltuPopup'
 import DiscoMode from '../components/DiscoMode'
+import LuckyDrawTimer from '../components/LuckyDrawTimer'
 import { triggerConfettiBurst } from '../utils/confettiBlast'
 
 const stupidQuotes = [
@@ -128,6 +129,9 @@ const Dashboard = () => {
   return (
     <div className={`min-h-screen transition-all duration-500 ${randomTheme || 'bg-gradient-to-br from-purple-500 via-pink-500 to-red-500'}`}>
       <DiscoMode active={discoMode} />
+      
+      {/* Lucky Draw Timer - Top Right */}
+      <LuckyDrawTimer />
       
       {showPopup && (
         <FaltuPopup
