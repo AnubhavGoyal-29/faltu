@@ -86,7 +86,8 @@ const submitWordleGuess = async (userId, guess, user = null) => {
       success: true,
       correct: true,
       result: result,
-      message: `Sahi hai bhai! ${dailyWord} word mil gaya! 100 points mil gaye! 🎉`
+      message: `Sahi hai bhai! ${dailyWord} word mil gaya! 100 points mil gaye! 🎉`,
+      correctWord: dailyWord
     };
   }
 
