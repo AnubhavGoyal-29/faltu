@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { io } from 'socket.io-client'
 import { useAuth } from '../context/AuthContext'
-import { triggerConfetti } from '../utils/confettiBlast'
+import { triggerConfettiBurst } from '../utils/confettiBlast'
 
 const bakchodMessages = [
   "Kuch nahi hua...",
@@ -33,7 +33,7 @@ const LuckyDrawTimer = () => {
       setWinner(data.winner)
       setMessage(data.message)
       setShowMessage(true)
-      triggerConfetti()
+      triggerConfettiBurst()
       setTimeout(() => {
         setShowMessage(false)
         setWinner(null)
