@@ -19,42 +19,45 @@ const Login = () => {
   }, [token, navigate])
 
   useEffect(() => {
-    // Show background image for first 5 seconds
-    setShowBackground(true)
-    const bgTimer = setTimeout(() => {
-      setShowBackground(false)
-    }, 5000)
-
     // Move button randomly for first 5 seconds
-    if (isMoving) {
-      moveIntervalRef.current = setInterval(() => {
-        const maxX = window.innerWidth - 200 // Button width approx
-        const maxY = window.innerHeight - 100 // Button height approx
-        const newX = Math.random() * maxX
-        const newY = Math.random() * maxY
+    moveIntervalRef.current = setInterval(() => {
+      if (isMoving) {
+        const maxX = window.innerWidth - 250 // Button width approx
+        const maxY = window.innerHeight - 150 // Button height approx
+        const minX = 150
+        const minY = 100
+        const newX = Math.max(minX, Math.min(maxX, Math.random() * maxX + minX))
+        const newY = Math.max(minY, Math.min(maxY, Math.random() * maxY + minY))
         
         setButtonPosition({ x: newX, y: newY })
-      }, 200) // Move every 200ms
+      }
+    }, 150) // Move every 150ms
 
-      // Stop moving after 5 seconds
-      const stopTimer = setTimeout(() => {
-        setIsMoving(false)
-        if (moveIntervalRef.current) {
-          clearInterval(moveIntervalRef.current)
-        }
-        // Set button to center position
-        setButtonPosition({ x: 50, y: 50 })
+    // Stop moving after 5 seconds
+    const stopTimer = setTimeout(() => {
+      setIsMoving(false)
+      if (moveIntervalRef.current) {
+        clearInterval(moveIntervalRef.current)
+      }
+    }, 5000)
+
+    // Show background image AFTER button stops moving (after 5 seconds)
+    const bgTimer = setTimeout(() => {
+      setShowBackground(true)
+      // Hide background image after next 5 seconds
+      setTimeout(() => {
+        setShowBackground(false)
       }, 5000)
+    }, 5000)
 
-      return () => {
-        clearTimeout(bgTimer)
-        clearTimeout(stopTimer)
-        if (moveIntervalRef.current) {
-          clearInterval(moveIntervalRef.current)
-        }
+    return () => {
+      clearTimeout(stopTimer)
+      clearTimeout(bgTimer)
+      if (moveIntervalRef.current) {
+        clearInterval(moveIntervalRef.current)
       }
     }
-  }, [isMoving])
+  }, [])
 
   const buttonStyle = isMoving
     ? {
@@ -98,14 +101,13 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="mt-12 space-y-4">
+        <div className="mt-12 space-y-4" style={isMoving ? { position: 'relative', minHeight: '100px' } : {}}>
           <FloatingButton
-            ref={buttonRef}
             onClick={login}
             className="bg-white text-purple-600 hover:bg-purple-100 shadow-2xl"
             style={buttonStyle}
           >
-            <span className="flex items-center gap-3">
+            <span className="flex items-center gap-3 whitespace-nowrap">
               <span className="text-2xl">🚀</span>
               <span>{isMoving ? 'Click me if you can' : 'LOGIN KARLE YA SOJA'}</span>
               {!isMoving && <span className="text-2xl">🌀</span>}
