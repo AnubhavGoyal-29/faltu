@@ -30,6 +30,7 @@ const luckyDrawRoutes = require('./routes/luckyDrawRoutes');
 const chaosRoutes = require('./routes/chaosRoutes');
 const wordleRoutes = require('./routes/wordleRoutes');
 const tambolaRoutes = require('./routes/tambolaRoutes');
+const gamesRoutes = require('./routes/gamesRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -62,6 +63,7 @@ app.use('/api/lucky-draws', luckyDrawRoutes);
 app.use('/api/chaos', chaosRoutes);
 app.use('/api/wordle', wordleRoutes);
 app.use('/api/tambola', tambolaRoutes);
+app.use('/api/games', gamesRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
