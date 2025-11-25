@@ -12,13 +12,18 @@ const client = new OAuth2Client(
 // Can handle both access_token (OAuth2) and id_token (OpenID Connect)
 const verifyGoogleToken = async (token) => {
   try {
+    console.log('🔐 [AUTH SERVICE] Verifying token...');
+    console.log('🔐 [AUTH SERVICE] GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set');
+    
     // Try to verify as ID token first
     try {
+      console.log('🔐 [AUTH SERVICE] Trying ID token verification...');
       const ticket = await client.verifyIdToken({
         idToken: token,
         audience: process.env.GOOGLE_CLIENT_ID
       });
       const payload = ticket.getPayload();
+      console.log('🔐 [AUTH SERVICE] ✅ ID token verified');
       return {
         googleId: payload.sub,
         email: payload.email,
@@ -26,6 +31,9 @@ const verifyGoogleToken = async (token) => {
         profilePhoto: payload.picture
       };
     } catch (idTokenError) {
+      console.log('🔐 [AUTH SERVICE] ID token failed, trying access token...');
+      console.log('🔐 [AUTH SERVICE] ID token error:', idTokenError.message);
+      
       // If ID token verification fails, try as access token
       // Fetch user info from Google API
       const axios = require('axios');
@@ -36,6 +44,7 @@ const verifyGoogleToken = async (token) => {
       });
       
       const userInfo = userInfoResponse.data;
+      console.log('🔐 [AUTH SERVICE] ✅ Access token verified, user:', userInfo.email);
       return {
         googleId: userInfo.sub,
         email: userInfo.email,
@@ -44,7 +53,9 @@ const verifyGoogleToken = async (token) => {
       };
     }
   } catch (error) {
-    throw new Error('Invalid Google token');
+    console.error('🔐 [AUTH SERVICE] ❌ Token verification failed:', error.message);
+    console.error('🔐 [AUTH SERVICE] Error details:', error);
+    throw new Error(`Invalid Google token: ${error.message}`);
   }
 };
 

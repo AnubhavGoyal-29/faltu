@@ -69,19 +69,26 @@ const adminLogin = async (req, res) => {
 const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
+    console.log('🔐 [AUTH] Google login request received');
 
     if (!token) {
+      console.error('🔐 [AUTH] ❌ No token provided');
       return res.status(400).json({ error: 'Google token is required' });
     }
 
+    console.log('🔐 [AUTH] Verifying Google token...');
     // Verify Google token
     const googleUserData = await verifyGoogleToken(token);
+    console.log('🔐 [AUTH] ✅ Token verified, user data:', googleUserData);
 
     // Find or create user
+    console.log('🔐 [AUTH] Finding or creating user...');
     const user = await findOrCreateUser(googleUserData);
+    console.log('🔐 [AUTH] ✅ User found/created:', user.user_id);
 
     // Update login streak
     const streak = await updateLoginStreak(user.user_id);
+    console.log('🔐 [AUTH] Login streak:', streak);
 
     // Award points for login (10 points) - with AI suggestion
     await addPoints(user.user_id, 10, 'daily_login', {
@@ -92,6 +99,7 @@ const googleLogin = async (req, res) => {
 
     // Generate JWT token
     const jwtToken = generateToken(user.user_id);
+    console.log('🔐 [AUTH] ✅ JWT token generated');
 
     // Generate AI welcome message (non-blocking)
     let welcomeMessage = null;
@@ -105,6 +113,7 @@ const googleLogin = async (req, res) => {
       console.error('Welcome message generation error:', error);
     }
 
+    console.log('🔐 [AUTH] ✅ Login successful for user:', user.name);
     res.json({
       token: jwtToken,
       user: {
@@ -117,7 +126,8 @@ const googleLogin = async (req, res) => {
       welcome_message: welcomeMessage
     });
   } catch (error) {
-    console.error('Google login error:', error);
+    console.error('🔐 [AUTH] ❌ Google login error:', error);
+    console.error('🔐 [AUTH] Error stack:', error.stack);
     res.status(401).json({ error: error.message || 'Authentication failed' });
   }
 };
