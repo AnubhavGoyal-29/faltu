@@ -1,4 +1,5 @@
 const { getLastLuckyDraw } = require('../services/luckyDrawService');
+const { getRecentMinuteDraws } = require('../services/minuteLuckyDrawService');
 
 // Get last lucky draw winner
 const getLastDraw = async (req, res) => {
