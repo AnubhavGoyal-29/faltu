@@ -19,22 +19,27 @@ const Login = () => {
   }, [token, navigate])
 
   useEffect(() => {
+    console.log('🎯 Starting button movement...')
+    
     // Move button randomly for first 5 seconds
     moveIntervalRef.current = setInterval(() => {
-      if (isMoving) {
-        const maxX = window.innerWidth - 250 // Button width approx
-        const maxY = window.innerHeight - 150 // Button height approx
-        const minX = 150
-        const minY = 100
-        const newX = Math.max(minX, Math.min(maxX, Math.random() * maxX + minX))
-        const newY = Math.max(minY, Math.min(maxY, Math.random() * maxY + minY))
-        
-        setButtonPosition({ x: newX, y: newY })
-      }
-    }, 150) // Move every 150ms
+      const buttonWidth = 250
+      const buttonHeight = 80
+      const maxX = window.innerWidth - buttonWidth
+      const maxY = window.innerHeight - buttonHeight
+      const minX = buttonWidth / 2
+      const minY = buttonHeight / 2
+      
+      const newX = Math.random() * (maxX - minX) + minX
+      const newY = Math.random() * (maxY - minY) + minY
+      
+      console.log('📍 Moving button to:', { x: newX, y: newY })
+      setButtonPosition({ x: newX, y: newY })
+    }, 100) // Move every 100ms for smoother movement
 
     // Stop moving after 5 seconds
     const stopTimer = setTimeout(() => {
+      console.log('⏹️ Stopping button movement')
       setIsMoving(false)
       if (moveIntervalRef.current) {
         clearInterval(moveIntervalRef.current)
@@ -43,9 +48,11 @@ const Login = () => {
 
     // Show background image AFTER button stops moving (after 5 seconds)
     const bgTimer = setTimeout(() => {
+      console.log('🖼️ Showing background image')
       setShowBackground(true)
       // Hide background image after next 5 seconds
       setTimeout(() => {
+        console.log('🖼️ Hiding background image')
         setShowBackground(false)
       }, 5000)
     }, 5000)
@@ -66,14 +73,16 @@ const Login = () => {
         top: `${buttonPosition.y}px`,
         transform: 'translate(-50%, -50%)',
         transition: 'none',
-        zIndex: 1000
+        zIndex: 1000,
+        pointerEvents: 'auto'
       }
     : {
         position: 'relative',
         left: 'auto',
         top: 'auto',
         transform: 'none',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.5s ease',
+        zIndex: 10
       }
 
   return (
@@ -101,19 +110,31 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="mt-12 space-y-4" style={isMoving ? { position: 'relative', minHeight: '100px' } : {}}>
-          <FloatingButton
+        {isMoving ? (
+          <button
             onClick={login}
-            className="bg-white text-purple-600 hover:bg-purple-100 shadow-2xl"
+            className="bg-white text-purple-600 hover:bg-purple-100 shadow-2xl px-6 py-4 rounded-2xl font-bold text-lg cursor-pointer"
             style={buttonStyle}
           >
             <span className="flex items-center gap-3 whitespace-nowrap">
               <span className="text-2xl">🚀</span>
-              <span>{isMoving ? 'Click me if you can' : 'LOGIN KARLE YA SOJA'}</span>
-              {!isMoving && <span className="text-2xl">🌀</span>}
+              <span>Click me if you can</span>
             </span>
-          </FloatingButton>
-        </div>
+          </button>
+        ) : (
+          <div className="mt-12 space-y-4">
+            <FloatingButton
+              onClick={login}
+              className="bg-white text-purple-600 hover:bg-purple-100 shadow-2xl"
+            >
+              <span className="flex items-center gap-3 whitespace-nowrap">
+                <span className="text-2xl">🚀</span>
+                <span>LOGIN KARLE YA SOJA</span>
+                <span className="text-2xl">🌀</span>
+              </span>
+            </FloatingButton>
+          </div>
+        )}
 
         <div className="mt-8 space-y-2">
           <p className="text-white text-lg font-semibold">

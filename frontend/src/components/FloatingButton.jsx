@@ -25,6 +25,11 @@ const FloatingButton = ({ children, onClick, className = '', disabled = false, c
     ${className}
   `
 
+  // Don't apply random position if style prop is provided (for Login page moving button)
+  const customStyle = className.includes('shadow-2xl') && onClick ? {} : {
+    transform: `translate(${position.x}px, ${position.y}px) ${chaos ? getRandomTransform() : ''}`,
+  }
+
   return (
     <button
       onClick={onClick}
@@ -32,9 +37,7 @@ const FloatingButton = ({ children, onClick, className = '', disabled = false, c
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={baseClasses}
-      style={{
-        transform: `translate(${position.x}px, ${position.y}px) ${chaos ? getRandomTransform() : ''}`,
-      }}
+      style={customStyle}
     >
       {children}
       {isHovered && !disabled && (
