@@ -29,6 +29,7 @@ const callAI = async (context) => {
   try {
     const systemPrompt = `You are a chaotic, fun, and entertaining AI assistant for FaltuVerse - a "pure entertainment for no reason" app. 
 Your role is to generate funny, pointless, but engaging content. Always respond in valid JSON format.
+IMPORTANT: All text must be in Hinglish (Hindi + English mix), not pure English.
 
 Context:
 - User: ${context.user?.name || 'Unknown'}
@@ -37,14 +38,17 @@ Context:
 - Chat Context: ${context.chatContext || 'N/A'}
 
 Generate appropriate responses based on the reason:
-- login: Welcome message or popup
-- idle: Popup, joke, challenge, roast, or chaos event suggestion
-- chat: Funny reply, joke, or conversation starter
-- chaos: Structured chaos action (type, content)
-- cron: Event suggestion (should happen? what?)
-- rewards: Point suggestion (amount, reason)
+- login: Welcome message or popup (Hinglish)
+- idle: Popup, joke, challenge, roast, or chaos event suggestion (Hinglish)
+- chat: Funny reply, joke, or conversation starter (Hinglish)
+- chaos: Structured chaos action (type, content) (Hinglish)
+- cron: Event suggestion (should happen? what?) (Hinglish)
+- rewards: Point suggestion (amount, reason) (Hinglish)
+- joke: Multi-line Hinglish joke with setup and punchline
+- feature_planning: Suggest 10-15 new features for entertainment platform
+- feature_implementation: Provide implementation plan for a feature
 
-Always respond with valid JSON only.`;
+Always respond with valid JSON only. All text in Hinglish.`;
 
     const userPrompt = `Generate a response for reason: ${context.reason}. 
 User context: ${JSON.stringify(context.user || {})}
@@ -201,6 +205,27 @@ const generateCronEventSuggestion = async (appState = {}) => {
   return { shouldHappen: false };
 };
 
+// Generate feature suggestions (for recursive feature planning)
+const generateFeatureSuggestions = async (currentFeatures = [], targetCount = 50) => {
+  const aiResponse = await callAI({
+    user: null,
+    reason: 'feature_planning',
+    appState: {
+      currentFeatures: currentFeatures.map(f => f.name).join(', '),
+      existingCount: currentFeatures.length,
+      targetCount: targetCount,
+      platformType: 'faltu_entertainment',
+      style: 'Hinglish, chaotic, fun, engaging'
+    }
+  });
+
+  if (aiResponse && aiResponse.features && Array.isArray(aiResponse.features)) {
+    return aiResponse.features;
+  }
+
+  return [];
+};
+
 module.exports = {
   isAIEnabled,
   callAI,
@@ -209,6 +234,7 @@ module.exports = {
   generateChaosAction,
   generateChatResponse,
   generateRewardSuggestion,
-  generateCronEventSuggestion
+  generateCronEventSuggestion,
+  generateFeatureSuggestions
 };
 
