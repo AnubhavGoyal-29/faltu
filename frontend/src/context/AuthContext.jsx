@@ -49,6 +49,8 @@ export const AuthProvider = ({ children }) => {
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
+        console.log('🔐 [LOGIN] Google token received:', tokenResponse)
+        
         // Get user info from Google
         const googleUserResponse = await fetch(
           'https://www.googleapis.com/oauth2/v3/userinfo',
@@ -58,33 +60,44 @@ export const AuthProvider = ({ children }) => {
             }
           }
         )
+        
+        if (!googleUserResponse.ok) {
+          throw new Error(`Google API error: ${googleUserResponse.status}`)
+        }
+        
         const googleUser = await googleUserResponse.json()
+        console.log('🔐 [LOGIN] Google user info:', googleUser)
 
         // Send to backend for verification and JWT generation
         const response = await api.post('/auth/google', {
           token: tokenResponse.access_token
         })
 
+        console.log('🔐 [LOGIN] Backend response:', response.data)
         const { token: jwtToken, user: userData } = response.data
+        
         setToken(jwtToken)
         setUser(userData)
         localStorage.setItem('token', jwtToken)
         api.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard'
       } catch (error) {
-        console.error('Login failed:', error)
-        alert('Login failed. Please try again.')
+        console.error('🔐 [LOGIN] Error details:', error)
+        console.error('🔐 [LOGIN] Error response:', error.response?.data)
+        const errorMsg = error.response?.data?.error || error.message || 'Login failed'
+        alert(`Login failed: ${errorMsg}`)
       }
     },
     onError: (error) => {
-      console.error('Google login failed:', error)
+      console.error('🔐 [LOGIN] Google OAuth error:', error)
       if (error.error === 'redirect_uri_mismatch') {
-        alert('Redirect URI mismatch! Google Console mein http://localhost:5173 add karo.')
+        alert('Redirect URI mismatch! Google Console mein http://localhost:3000 add karo.')
       } else {
-        alert('Google login failed. Please try again.')
+        alert(`Google login failed: ${error.error || error.message || 'Unknown error'}`)
       }
-    },
-    flow: 'auth-code', // Use authorization code flow
-    redirectUri: window.location.origin // Use current origin as redirect URI
+    }
   })
 
   const logout = () => {
