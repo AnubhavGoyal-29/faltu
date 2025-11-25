@@ -108,6 +108,7 @@ cron.schedule('* * * * *', async () => {
 // Schedule periodic AI chat room checks (every 2 minutes)
 cron.schedule('*/2 * * * *', async () => {
   try {
+    console.log(`🤖 [CHAT BOT] Periodic check chala rahe hain...`);
     const { ChatRoom } = require('./models');
     const { processChatRoomForAI } = require('./services/aiChatBot');
     
@@ -116,11 +117,12 @@ cron.schedule('*/2 * * * *', async () => {
       order: [['created_at', 'DESC']]
     });
 
+    console.log(`🤖 [CHAT BOT] ${activeRooms.length} active rooms mil gaye`);
     for (const room of activeRooms) {
       await processChatRoomForAI(room.room_id, room.name, io);
     }
   } catch (error) {
-    console.error('AI chat room check error:', error);
+    console.error(`🤖 [CHAT BOT] ❌ Periodic check error:`, error.message);
   }
 });
 

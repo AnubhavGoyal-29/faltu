@@ -29,9 +29,11 @@ const breakingNewsMessages = [
 const triggerChaosEvent = async (userId, user = null) => {
   // Try AI-generated chaos action first
   if (isAIEnabled() && user) {
+    console.log(`🤖 [CHAOS] User ${userId} ne chaos trigger kiya - AI se event generate kar rahe hain`);
     try {
       const aiChaos = await generateChaosAction(user, { userId });
       if (aiChaos && aiChaos.type) {
+        console.log(`🤖 [CHAOS] ✅ AI event generate hua: ${aiChaos.type}`);
         // Map AI type to our event types or use directly
         const eventType = CHAOS_EVENT_TYPES[aiChaos.type.toUpperCase()] || aiChaos.type;
         const eventData = {
@@ -54,11 +56,15 @@ const triggerChaosEvent = async (userId, user = null) => {
           event_data: eventData,
           created_at: event.created_at
         };
+      } else {
+        console.log(`🤖 [CHAOS] ⚠️ AI response nahi mila - default chaos use kar rahe hain`);
       }
     } catch (error) {
-      console.error('AI chaos generation error:', error);
+      console.error(`🤖 [CHAOS] ❌ Error:`, error.message);
       // Fall through to default behavior
     }
+  } else {
+    console.log(`🤖 [CHAOS] ℹ️ AI disabled ya user nahi hai - random chaos use kar rahe hain`);
   }
 
   // Default behavior (existing logic)
