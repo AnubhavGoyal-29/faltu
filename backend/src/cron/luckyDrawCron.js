@@ -9,6 +9,8 @@
 const cron = require('node-cron');
 const { runLuckyDraw } = require('../services/luckyDrawService');
 const { runMinuteLuckyDraw } = require('../services/minuteLuckyDrawService');
+const { withLock, LOCK_KEYS } = require('./locks');
+const { cron: cronLogger } = require('../utils/logger');
 
 // Backend-driven lucky draw timer state
 let luckyDrawTimer = 300; // 5 minutes in seconds
@@ -44,23 +46,28 @@ const initializeLuckyDrawTimer = (io) => {
  */
 const scheduleHourlyLuckyDraw = (io) => {
   cron.schedule('0 * * * *', async () => {
-    console.log('🎰 [LUCKY DRAW] Hourly draw chala rahe hain...');
-    try {
-      const result = await runLuckyDraw();
-      if (result) {
-        console.log(`🎰 [LUCKY DRAW] ✅ Winner: ${result.winner.name} - ${result.reward_points} points mil gaye!`);
-        io.emit('lucky_draw_winner', {
-          winner: result.winner,
-          reward_points: result.reward_points,
-          timestamp: result.draw.timestamp,
-          type: 'hourly'
-        });
-      } else {
-        console.log(`🎰 [LUCKY DRAW] ⚠️ Koi winner nahi mila`);
+    await withLock(LOCK_KEYS.LUCKY_DRAW_HOURLY, async () => {
+      cronLogger.info('Hourly lucky draw starting...');
+      try {
+        const result = await runLuckyDraw();
+        if (result) {
+          cronLogger.info('Hourly lucky draw winner', { 
+            winner: result.winner.name, 
+            points: result.reward_points 
+          });
+          io.emit('lucky_draw_winner', {
+            winner: result.winner,
+            reward_points: result.reward_points,
+            timestamp: result.draw.timestamp,
+            type: 'hourly'
+          });
+        } else {
+          cronLogger.info('No winner in hourly lucky draw');
+        }
+      } catch (error) {
+        cronLogger.error('Hourly lucky draw error', error);
       }
-    } catch (error) {
-      console.error('🎰 [LUCKY DRAW] ❌ Error aaya bhai:', error.message);
-    }
+    }, 300); // 5 minute lock
   });
 };
 
@@ -70,35 +77,40 @@ const scheduleHourlyLuckyDraw = (io) => {
  */
 const scheduleMinuteLuckyDraw = (io) => {
   cron.schedule('*/5 * * * *', async () => {
-    try {
-      console.log(`🎰 [LUCKY DRAW] 5-minute draw chala rahe hain...`);
-      const result = await runMinuteLuckyDraw();
-      
-      if (result.shouldRun && result.winner) {
-        console.log(`🎰 [LUCKY DRAW] ✅ Winner: ${result.winner.name} - ${result.reward_points} points!`);
-        // Broadcast to all connected clients
-        io.emit('lucky_draw_result', {
-          winner: result.winner,
-          reward_points: result.reward_points,
-          message: result.message,
-          timestamp: result.timestamp,
-          type: 'winner'
-        });
-      } else if (result.message) {
-        console.log(`🎰 [LUCKY DRAW] 💬 Message: ${result.message}`);
-        // Broadcast message
-        io.emit('lucky_draw_result', {
-          message: result.message,
-          type: result.type || 'message'
-        });
+    await withLock(LOCK_KEYS.LUCKY_DRAW_MINUTE, async () => {
+      cronLogger.info('5-minute lucky draw starting...');
+      try {
+        const result = await runMinuteLuckyDraw();
+        
+        if (result.shouldRun && result.winner) {
+          cronLogger.info('5-minute lucky draw winner', { 
+            winner: result.winner.name, 
+            points: result.reward_points 
+          });
+          // Broadcast to all connected clients
+          io.emit('lucky_draw_result', {
+            winner: result.winner,
+            reward_points: result.reward_points,
+            message: result.message,
+            timestamp: result.timestamp,
+            type: 'winner'
+          });
+        } else if (result.message) {
+          cronLogger.info('5-minute lucky draw message', { message: result.message });
+          // Broadcast message
+          io.emit('lucky_draw_result', {
+            message: result.message,
+            type: result.type || 'message'
+          });
+        }
+        
+        // Reset timer
+        luckyDrawStartTime = Date.now();
+        luckyDrawTimer = 300;
+      } catch (error) {
+        cronLogger.error('5-minute lucky draw error', error);
       }
-      
-      // Reset timer
-      luckyDrawStartTime = Date.now();
-      luckyDrawTimer = 300;
-    } catch (error) {
-      console.error('🎰 [LUCKY DRAW] ❌ Error:', error.message);
-    }
+    }, 300); // 5 minute lock
   });
 };
 

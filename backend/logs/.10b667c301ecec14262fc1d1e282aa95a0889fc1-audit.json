@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "/Users/crafto/faltu/backend/logs/.10b667c301ecec14262fc1d1e282aa95a0889fc1-audit.json",
+    "files": [
+        {
+            "date": 1764163527761,
+            "name": "/Users/crafto/faltu/backend/logs/errors-2025-11-26.log",
+            "hash": "32b181b379b8a630218e62c55575224f3bf25ebcf8d0159a0f2827cbb93a66cb"
+        }
+    ],
+    "hashType": "sha256"
+}

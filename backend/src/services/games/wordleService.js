@@ -1,5 +1,7 @@
 const { isAIEnabled, callAI } = require('../ai/handlers/aiDecisionEngine');
 const { addPoints } = require('./pointsService');
+const { getOrSet } = require('../../utils/redisClient');
+const cacheConfig = require('../../config/cache');
 
 // Hinglish words for Wordle (5-letter words)
 const hinglishWords = [
@@ -17,12 +19,20 @@ const hinglishWords = [
   'HARD', 'TOUGH', 'EASY', 'SIMPLE', 'BASIC'
 ].map(w => w.substring(0, 5).toUpperCase()); // Ensure 5 letters
 
-// Get daily word (changes every day)
-const getDailyWord = () => {
-  const today = new Date();
-  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-  const wordIndex = dayOfYear % hinglishWords.length;
-  return hinglishWords[wordIndex];
+// Get daily word (changes every day) - with caching
+const getDailyWord = async () => {
+  const today = new Date().toISOString().split('T')[0];
+  const cacheKey = cacheConfig.keys.wordleDaily(today);
+  
+  return await getOrSet(
+    cacheKey,
+    () => {
+      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+      const wordIndex = dayOfYear % hinglishWords.length;
+      return hinglishWords[wordIndex];
+    },
+    cacheConfig.ttl.wordleDaily
+  );
 };
 
 // Check word guess
@@ -62,7 +72,7 @@ const checkWordGuess = (guess, correctWord) => {
 
 // Submit wordle guess
 const submitWordleGuess = async (userId, guess, user = null) => {
-  const dailyWord = getDailyWord();
+  const dailyWord = await getDailyWord();
   const guessUpper = guess.toUpperCase().substring(0, 5);
   
   if (guessUpper.length !== 5) {
@@ -104,7 +114,7 @@ const submitWordleGuess = async (userId, guess, user = null) => {
 const getWordleHint = async (attempts, user = null) => {
   if (isAIEnabled() && user) {
     try {
-      const dailyWord = getDailyWord();
+      const dailyWord = await getDailyWord();
       const aiResponse = await callAI({
         user,
         reason: 'wordle_hint',
@@ -127,7 +137,7 @@ const getWordleHint = async (attempts, user = null) => {
   }
 
   // Fallback hint
-  const dailyWord = getDailyWord();
+  const dailyWord = await getDailyWord();
   const randomLetter = dailyWord[Math.floor(Math.random() * 5)];
   return {
     hint: `Ek letter hai: ${randomLetter}`,

@@ -6,8 +6,9 @@ const {
   markActivityVisited,
   markActivityStatus,
   hasAvailableRushActivities,
-  getUserRushStats
-} = require('../../services/rushService');
+  getUserRushStats,
+  restartRush
+} = require('../../services/engagement/rushService');
 
 /**
  * GET /api/rush/next
@@ -124,6 +125,29 @@ router.get('/stats', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Stats fetch nahi huye'
+    });
+  }
+});
+
+/**
+ * POST /api/rush/restart
+ * Restart rush - assign new games
+ */
+router.post('/restart', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const assignedGames = await restartRush(userId);
+
+    res.json({
+      success: true,
+      message: 'Rush restart ho gaya! Naye games assign ho gaye',
+      assigned_games: assignedGames.length
+    });
+  } catch (error) {
+    console.error('🎯 [RUSH] Restart error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Rush restart nahi hua'
     });
   }
 });

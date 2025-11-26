@@ -34,6 +34,7 @@ const Dashboard = () => {
   const [popupMessage, setPopupMessage] = useState('')
   const [currentQuote, setCurrentQuote] = useState(stupidQuotes[0])
   const [buttonWiggle, setButtonWiggle] = useState(false)
+  const [rushStats, setRushStats] = useState(null)
 
   const isIdle = useIdleDetection(15000, async () => {
     // Try to get AI-generated engagement, fallback to random message
@@ -85,6 +86,17 @@ const Dashboard = () => {
     }
   }, [points, loginStreak])
 
+  const fetchRushStats = useCallback(async () => {
+    try {
+      const response = await api.get('/rush/stats')
+      if (response.data.success) {
+        setRushStats(response.data.stats)
+      }
+    } catch (error) {
+      console.error('Failed to fetch rush stats:', error)
+    }
+  }, [])
+
   const checkRushActivities = useCallback(async () => {
     try {
       console.log('🎯 [DASHBOARD] Checking for rush activities...')
@@ -104,13 +116,29 @@ const Dashboard = () => {
     }
   }, [navigate])
 
+  const handleRestartRush = async () => {
+    try {
+      const response = await api.post('/rush/restart')
+      if (response.data.success) {
+        triggerConfettiBurst()
+        // Refresh stats
+        await fetchRushStats()
+        // Navigate to rush
+        navigate('/rush')
+      }
+    } catch (error) {
+      console.error('Failed to restart rush:', error)
+    }
+  }
+
   useEffect(() => {
     // Only fetch if user is loaded
     if (user) {
       fetchDashboardData()
+      fetchRushStats()
       checkRushActivities()
     }
-  }, [user, fetchDashboardData, checkRushActivities]) // Include stable callbacks
+  }, [user, fetchDashboardData, fetchRushStats, checkRushActivities]) // Include stable callbacks
 
   // Separate effect for UI animations to prevent re-fetching on quote changes
   useEffect(() => {
@@ -286,8 +314,25 @@ const Dashboard = () => {
           </div>
           
           <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform animate-pulse-crazy">
-            <h3 className="text-2xl font-black mb-4 text-white">⚡ Start Rush</h3>
-            <p className="text-white mb-4 opacity-90">Complete all unvisited activities one by one!</p>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-2xl font-black text-white">⚡ Start Rush</h3>
+                {rushStats && (
+                  <p className="text-white text-lg font-bold mt-2">
+                    {rushStats.progress || `${rushStats.completed_count || 0}/${rushStats.total_activities || 10}`} Completed
+                  </p>
+                )}
+              </div>
+              {rushStats && rushStats.visited_today > 0 && (
+                <button
+                  onClick={handleRestartRush}
+                  className="px-3 py-1 bg-white bg-opacity-30 rounded-lg text-white text-sm font-bold hover:bg-opacity-50 transition-all"
+                >
+                  🔄 Restart
+                </button>
+              )}
+            </div>
+            <p className="text-white mb-4 opacity-90">Complete 10 random activities one by one!</p>
             <FloatingButton
               onClick={() => navigate('/rush')}
               className="w-full bg-white text-red-600 font-black"

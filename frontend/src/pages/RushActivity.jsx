@@ -16,6 +16,66 @@ import TapGame from './games/TapGame'
 import RunawayButton from './games/RunawayButton'
 import DareMachine from './games/DareMachine'
 import RoastMe from './games/RoastMe'
+// Missing 29 games
+import GyaanShot from './games/GyaanShot'
+import BakwaasMeter from './games/BakwaasMeter'
+import EmojiFight from './games/EmojiFight'
+import MoodSwitch from './games/MoodSwitch'
+import NonsensePoetry from './games/NonsensePoetry'
+import AukaatCheck from './games/AukaatCheck'
+import JhandChallenge from './games/JhandChallenge'
+import DesiSpeedTap from './games/DesiSpeedTap'
+import CringeMeter from './games/CringeMeter'
+import VibeCheck from './games/VibeCheck'
+import RandomFact from './games/RandomFact'
+import TimeBomb from './games/TimeBomb'
+import ChaosButton from './games/ChaosButton'
+import MemeGenerator from './games/MemeGenerator'
+import DesiRoast from './games/DesiRoast'
+import LuckDraw from './games/LuckDraw'
+import ReactionTest from './games/ReactionTest'
+import NonsenseGenerator from './games/NonsenseGenerator'
+import MoodRing from './games/MoodRing'
+import BakchodiMeter from './games/BakchodiMeter'
+import RandomDare from './games/RandomDare'
+import SpeedTyping from './games/SpeedTyping'
+import EmojiStory from './games/EmojiStory'
+import VibeMeter from './games/VibeMeter'
+import RandomCompliment from './games/RandomCompliment'
+import PressureCooker from './games/PressureCooker'
+import NonsenseQuiz from './games/NonsenseQuiz'
+import DesiChallenge from './games/DesiChallenge'
+import RandomRoast from './games/RandomRoast'
+// Import missing games from NEW 30 GAMES
+import GyaanGuru from './games/GyaanGuru'
+import BakwaasBattle from './games/BakwaasBattle'
+import EmojiMashup from './games/EmojiMashup'
+import MoodSwinger from './games/MoodSwinger'
+import PoetryChaos from './games/PoetryChaos'
+import AukaatMeter from './games/AukaatMeter'
+import JhandMeter from './games/JhandMeter'
+import DesiSpeedRush from './games/DesiSpeedRush'
+import CringeLevel from './games/CringeLevel'
+import VibeDetector from './games/VibeDetector'
+import UselessFact from './games/UselessFact'
+import BombTimer from './games/BombTimer'
+import ChaosGenerator from './games/ChaosGenerator'
+import MemeMaster from './games/MemeMaster'
+import DesiBurn from './games/DesiBurn'
+import LuckyChaos from './games/LuckyChaos'
+import ReflexMaster from './games/ReflexMaster'
+import NonsenseFactory from './games/NonsenseFactory'
+import MoodReader from './games/MoodReader'
+import BakchodiLevel from './games/BakchodiLevel'
+import DareMaster from './games/DareMaster'
+import TypingChaos from './games/TypingChaos'
+import EmojiTale from './games/EmojiTale'
+import VibeScanner from './games/VibeScanner'
+import ComplimentChaos from './games/ComplimentChaos'
+import PressureTest from './games/PressureTest'
+import QuizChaos from './games/QuizChaos'
+import ChaosSurvival from './games/ChaosSurvival'
+import DesiMaster from './games/DesiMaster'
 
 const ACTIVITY_COMPONENTS = {
   bakchodi: BakchodiChallenge,
@@ -27,7 +87,67 @@ const ACTIVITY_COMPONENTS = {
   tap: TapGame,
   runaway: RunawayButton,
   dare: DareMachine,
-  roast: RoastMe
+  roast: RoastMe,
+  // Missing 29 games (camelCase keys to match backend)
+  gyaanShot: GyaanShot,
+  bakwaasMeter: BakwaasMeter,
+  emojiFight: EmojiFight,
+  moodSwitch: MoodSwitch,
+  nonsensePoetry: NonsensePoetry,
+  aukaatCheck: AukaatCheck,
+  jhandChallenge: JhandChallenge,
+  desiSpeedTap: DesiSpeedTap,
+  cringeMeter: CringeMeter,
+  vibeCheck: VibeCheck,
+  randomFact: RandomFact,
+  timeBomb: TimeBomb,
+  chaosButton: ChaosButton,
+  memeGenerator: MemeGenerator,
+  desiRoast: DesiRoast,
+  luckDraw: LuckDraw,
+  reactionTest: ReactionTest,
+  nonsenseGenerator: NonsenseGenerator,
+  moodRing: MoodRing,
+  bakchodiMeter: BakchodiMeter,
+  randomDare: RandomDare,
+  speedTyping: SpeedTyping,
+  emojiStory: EmojiStory,
+  vibeMeter: VibeMeter,
+  randomCompliment: RandomCompliment,
+  pressureCooker: PressureCooker,
+  nonsenseQuiz: NonsenseQuiz,
+  desiChallenge: DesiChallenge,
+  randomRoast: RandomRoast,
+  // NEW 30 GAMES (camelCase keys to match backend)
+  gyaanGuru: GyaanGuru,
+  bakwaasBattle: BakwaasBattle,
+  emojiMashup: EmojiMashup,
+  moodSwinger: MoodSwinger,
+  poetryChaos: PoetryChaos,
+  aukaatMeter: AukaatMeter,
+  jhandMeter: JhandMeter,
+  desiSpeedRush: DesiSpeedRush,
+  cringeLevel: CringeLevel,
+  vibeDetector: VibeDetector,
+  uselessFact: UselessFact,
+  bombTimer: BombTimer,
+  chaosGenerator: ChaosGenerator,
+  memeMaster: MemeMaster,
+  desiBurn: DesiBurn,
+  luckyChaos: LuckyChaos,
+  reflexMaster: ReflexMaster,
+  nonsenseFactory: NonsenseFactory,
+  moodReader: MoodReader,
+  bakchodiLevel: BakchodiLevel,
+  dareMaster: DareMaster,
+  typingChaos: TypingChaos,
+  emojiTale: EmojiTale,
+  vibeScanner: VibeScanner,
+  complimentChaos: ComplimentChaos,
+  pressureTest: PressureTest,
+  quizChaos: QuizChaos,
+  chaosSurvival: ChaosSurvival,
+  desiMaster: DesiMaster
 }
 
 const RushActivity = () => {
@@ -38,14 +158,56 @@ const RushActivity = () => {
   const [loading, setLoading] = useState(!activityType || !ACTIVITY_COMPONENTS[activityType])
   const [activityData, setActivityData] = useState(null)
   const [showSkipButton, setShowSkipButton] = useState(true)
+  const [activityStatus, setActivityStatus] = useState(null) // 'completed', 'skipped', or null
+  const [rushStats, setRushStats] = useState(null) // { completed_count, total_activities, progress }
+
+  // Fetch rush stats
+  const fetchRushStats = async () => {
+    try {
+      const response = await api.get('/rush/stats')
+      if (response.data.success) {
+        setRushStats(response.data.stats)
+      }
+    } catch (error) {
+      console.error('Failed to fetch rush stats:', error)
+    }
+  }
+
+  // Check activity status
+  const checkActivityStatus = async () => {
+    if (!activityType) return
+    try {
+      // We'll check if activity is completed by checking stats
+      // For now, we'll check when component loads
+      const response = await api.get('/rush/stats')
+      if (response.data.success) {
+        // We need to check if this specific activity is completed
+        // For simplicity, we'll assume it's not completed initially
+        // The status will be updated when user completes/skips
+        setActivityStatus(null)
+      }
+    } catch (error) {
+      console.error('Failed to check activity status:', error)
+    }
+  }
+
+  // Handle redirect for games without direct rush components
+  useEffect(() => {
+    if (activityType && !ACTIVITY_COMPONENTS[activityType]) {
+      // Redirect to game page for games without direct rush components (camelCase)
+      navigate(`/games/${activityType}`, { replace: true })
+    }
+  }, [activityType, navigate])
 
   useEffect(() => {
+    fetchRushStats()
     if (!activityType) {
       // If no activity type, get next rush activity
       fetchNextActivity()
     } else if (ACTIVITY_COMPONENTS[activityType]) {
       // If activityType exists and is valid, mark as visited and set loading to false
       setLoading(false)
+      checkActivityStatus()
       // Mark activity as visited when component loads
       api.post('/rush/complete', {
         activity_type: activityType,
@@ -89,11 +251,21 @@ const RushActivity = () => {
         status: 'skipped'
       })
       
+      setActivityStatus('skipped')
+      fetchRushStats() // Update stats
+      
       // Move to next activity
-      fetchNextActivity()
+      setTimeout(() => {
+        fetchNextActivity()
+      }, 500)
     } catch (error) {
       console.error('Failed to skip activity:', error)
     }
+  }
+
+  const handleNext = async () => {
+    // Just move to next activity (activity already completed)
+    fetchNextActivity()
   }
 
   const handleComplete = async () => {
@@ -103,6 +275,8 @@ const RushActivity = () => {
         status: 'completed'
       })
       
+      setActivityStatus('completed')
+      fetchRushStats() // Update stats
       triggerConfettiBurst()
       
       // Move to next activity after a short delay
@@ -125,7 +299,8 @@ const RushActivity = () => {
     )
   }
 
-  if (!activityType || !ACTIVITY_COMPONENTS[activityType]) {
+  // If activity type doesn't have a direct component, redirect to game page
+  if (!activityType) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800 flex items-center justify-center">
         <div className="text-center text-white">
@@ -141,19 +316,49 @@ const RushActivity = () => {
     )
   }
 
+  // If component exists, use it; otherwise show loading (redirect handled in useEffect)
+  if (!ACTIVITY_COMPONENTS[activityType]) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800 flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-6xl mb-4 animate-spin">🎯</div>
+          <p className="text-2xl font-bold">Game load ho raha hai...</p>
+        </div>
+      </div>
+    )
+  }
+
   const ActivityComponent = ACTIVITY_COMPONENTS[activityType]
 
   return (
     <div className="relative">
-      {/* Skip button - fixed top right */}
-      {showSkipButton && (
+      {/* Rush Stats - Top Left */}
+      {rushStats && (
+        <div className="fixed top-4 left-4 z-50 bg-white bg-opacity-90 rounded-full px-4 py-2 shadow-lg">
+          <span className="text-lg font-bold text-gray-800">
+            {rushStats.progress || `${rushStats.completed_count || 0}/${rushStats.total_activities || 10}`}
+          </span>
+        </div>
+      )}
+      
+      {/* Skip/Next Button - Top Right */}
+      {showSkipButton && activityType && (
         <div className="fixed top-4 right-4 z-50">
-          <FloatingButton
-            onClick={handleSkip}
-            className="bg-red-500 text-white hover:bg-red-600"
-          >
-            ⏭️ Skip
-          </FloatingButton>
+          {activityStatus === 'completed' ? (
+            <FloatingButton
+              onClick={handleNext}
+              className="bg-green-500 text-white hover:bg-green-600"
+            >
+              ➡️ Next
+            </FloatingButton>
+          ) : (
+            <FloatingButton
+              onClick={handleSkip}
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
+              ⏭️ Skip
+            </FloatingButton>
+          )}
         </div>
       )}
 

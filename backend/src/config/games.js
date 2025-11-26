@@ -157,26 +157,6 @@ module.exports = {
       ratingMultiplier: 0.2
     },
     
-    aukaatCheck: {
-      enabled: true,
-      dailyLimit: 1,
-      pointsPerPlay: 0,
-      pointsPerWin: 25,
-      requiresAI: true,
-      roastProbability: 0.6,
-      complimentProbability: 0.4
-    },
-    
-    jhandChallenge: {
-      enabled: true,
-      dailyLimit: null,
-      pointsPerPlay: 1,
-      pointsPerWin: 10,
-      challengeTypes: ['random', 'chaos', 'cringe', 'funny'],
-      completionTime: 60000,
-      requiresAI: false
-    },
-    
     desiSpeedTap: {
       enabled: true,
       dailyLimit: null,
@@ -208,16 +188,6 @@ module.exports = {
       accuracyBonus: 5
     },
     
-    randomFact: {
-      enabled: true,
-      dailyLimit: 3,
-      pointsPerPlay: 5,
-      pointsPerWin: 12,
-      requiresAI: true,
-      factCategories: ['useless', 'weird', 'funny', 'random'],
-      verificationBonus: 3
-    },
-    
     timeBomb: {
       enabled: true,
       dailyLimit: null,
@@ -227,16 +197,6 @@ module.exports = {
       maxTime: 20000,
       pressureMultiplier: 1.2,
       requiresAI: false
-    },
-    
-    chaosButton: {
-      enabled: true,
-      dailyLimit: null,
-      pointsPerPlay: 0,
-      pointsPerWin: 8,
-      chaosEvents: ['points', 'roast', 'compliment', 'dare', 'random'],
-      eventWeights: [30, 20, 20, 15, 15],
-      requiresAI: true
     },
     
     memeGenerator: {
@@ -249,29 +209,6 @@ module.exports = {
       maxScore: 100,
       viralThreshold: 80,
       viralBonus: 20
-    },
-    
-    desiRoast: {
-      enabled: true,
-      dailyLimit: null,
-      pointsPerPlay: 2,
-      pointsPerWin: 12,
-      requiresAI: true,
-      roastIntensity: 'medium',
-      desiFlavor: true
-    },
-    
-    luckDraw: {
-      enabled: true,
-      dailyLimit: null,
-      pointsPerSpin: 0,
-      outcomes: {
-        jackpot: { weight: 5, pointsRange: [50, 100] },
-        win: { weight: 20, pointsRange: [10, 30] },
-        smallWin: { weight: 40, pointsRange: [1, 9] },
-        nothing: { weight: 35, pointsRange: [0, 0] }
-      },
-      requiresAI: false
     },
     
     reactionTest: {
@@ -319,16 +256,6 @@ module.exports = {
       legendaryBonus: 15
     },
     
-    randomDare: {
-      enabled: true,
-      dailyLimit: null,
-      pointsPerPlay: 2,
-      pointsPerWin: 10,
-      requiresAI: true,
-      dareIntensity: 'random',
-      completionBonus: 5
-    },
-    
     speedTyping: {
       enabled: true,
       dailyLimit: null,
@@ -359,16 +286,6 @@ module.exports = {
       vibeRange: [0, 100],
       pointsMultiplier: 0.1,
       perfectVibeBonus: 10
-    },
-    
-    randomCompliment: {
-      enabled: true,
-      dailyLimit: null,
-      pointsPerPlay: 1,
-      pointsPerWin: 8,
-      requiresAI: true,
-      complimentTypes: ['funny', 'sincere', 'roast-style', 'meme'],
-      surpriseBonus: 5
     },
     
     pressureCooker: {
@@ -405,26 +322,240 @@ module.exports = {
       survivalBonus: 5
     },
     
-    desiChallenge: {
+    // NEW 30 GAMES START HERE
+    
+    bakwaasBattle: {
       enabled: true,
       dailyLimit: null,
       pointsPerPlay: 2,
-      pointsPerWin: 14,
+      pointsPerWin: 12,
       requiresAI: true,
-      challengeTypes: ['food', 'language', 'culture', 'memes'],
-      desiFlavor: true,
-      completionBonus: 4
+      battleRounds: 3,
+      nonsenseMultiplier: 0.15,
+      winBonus: 8
     },
     
-    randomRoast: {
+    emojiMashup: {
+      enabled: true,
+      dailyLimit: 5,
+      pointsPerPlay: 3,
+      pointsPerWin: 15,
+      requiresAI: true,
+      emojiCount: [3, 8],
+      creativityMultiplier: 0.2,
+      viralBonus: 10
+    },
+    
+    moodSwinger: {
       enabled: true,
       dailyLimit: null,
       pointsPerPlay: 2,
       pointsPerWin: 10,
+      moodChanges: 5,
+      timeLimit: 20000,
+      perfectMoodBonus: 5,
+      requiresAI: false
+    },
+    
+    poetryChaos: {
+      enabled: true,
+      dailyLimit: 2,
+      pointsPerPlay: 4,
+      pointsPerWin: 20,
       requiresAI: true,
-      roastStyle: 'random',
-      intensity: 'medium',
-      comebackBonus: 5
+      poetryStyles: ['haiku', 'limerick', 'free', 'nonsense'],
+      rhymeBonus: 5,
+      creativityMultiplier: 0.22
+    },
+    
+    desiSpeedRush: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 1,
+      duration: 8000,
+      pointsMultiplier: 0.06,
+      speedThreshold: 250,
+      speedBonus: 1.8,
+      requiresAI: false
+    },
+    
+    cringeLevel: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 2,
+      requiresAI: true,
+      cringeScore: [0, 100],
+      pointsMultiplier: 0.13,
+      extremeCringeThreshold: 85,
+      extremeBonus: 12
+    },
+    
+    vibeDetector: {
+      enabled: true,
+      dailyLimit: 5,
+      pointsPerPlay: 3,
+      pointsPerWin: 16,
+      requiresAI: true,
+      vibeTypes: ['chill', 'hype', 'moody', 'wild', 'zen', 'chaos'],
+      accuracyThreshold: 0.75,
+      accuracyBonus: 6
+    },
+    
+    uselessFact: {
+      enabled: true,
+      dailyLimit: 3,
+      pointsPerPlay: 5,
+      pointsPerWin: 14,
+      requiresAI: true,
+      factTypes: ['useless', 'weird', 'funny', 'random', 'absurd'],
+      uselessnessBonus: 4,
+      surpriseFactor: 3
+    },
+    
+    bombTimer: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 2,
+      pointsPerWin: 18,
+      minTime: 3000,
+      maxTime: 25000,
+      pressureMultiplier: 1.4,
+      perfectTimingBonus: 8,
+      requiresAI: false
+    },
+    
+    memeMaster: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 0,
+      pointsMultiplier: 0.28,
+      requiresAI: true,
+      memeScore: [0, 100],
+      viralThreshold: 85,
+      viralBonus: 25,
+      legendaryThreshold: 95,
+      legendaryBonus: 35
+    },
+    
+    reflexMaster: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 1,
+      pointsPerWin: 10,
+      rounds: 7,
+      minDelay: 800,
+      maxDelay: 6000,
+      perfectThreshold: 150,
+      perfectBonus: 7,
+      requiresAI: false
+    },
+    
+    nonsenseFactory: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 1,
+      pointsPerWin: 8,
+      requiresAI: true,
+      nonsenseTypes: ['word', 'sentence', 'story', 'poem', 'quote'],
+      creativityBonus: 4,
+      absurdityMultiplier: 0.12
+    },
+    
+    moodReader: {
+      enabled: true,
+      dailyLimit: 5,
+      pointsPerPlay: 3,
+      pointsPerWin: 14,
+      requiresAI: true,
+      moodAccuracy: 0.85,
+      moodBonus: 6,
+      perfectReadBonus: 8
+    },
+    
+    bakchodiLevel: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 2,
+      requiresAI: true,
+      bakchodiScore: [0, 100],
+      pointsMultiplier: 0.16,
+      legendaryThreshold: 98,
+      legendaryBonus: 20,
+      godLevelThreshold: 100,
+      godLevelBonus: 30
+    },
+    
+    typingChaos: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 1,
+      duration: 35000,
+      pointsMultiplier: 0.09,
+      wpmBonus: 3,
+      accuracyBonus: 4,
+      perfectTypingBonus: 10,
+      requiresAI: false
+    },
+    
+    emojiTale: {
+      enabled: true,
+      dailyLimit: 3,
+      pointsPerPlay: 4,
+      pointsPerWin: 18,
+      requiresAI: true,
+      minEmojis: 4,
+      maxEmojis: 12,
+      creativityMultiplier: 0.23,
+      storytellingBonus: 8
+    },
+    
+    vibeScanner: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 2,
+      requiresAI: true,
+      vibeRange: [0, 100],
+      pointsMultiplier: 0.11,
+      perfectVibeBonus: 12,
+      vibeMatchBonus: 8
+    },
+    
+    complimentChaos: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 1,
+      pointsPerWin: 10,
+      requiresAI: true,
+      complimentTypes: ['funny', 'sincere', 'roast-style', 'meme', 'absurd'],
+      surpriseBonus: 6,
+      creativityBonus: 4
+    },
+    
+    pressureTest: {
+      enabled: true,
+      dailyLimit: null,
+      pointsPerPlay: 2,
+      pointsPerWin: 14,
+      rounds: 4,
+      timeLimit: 12000,
+      pressureMultiplier: 1.5,
+      perfectRoundBonus: 6,
+      survivalBonus: 8,
+      requiresAI: false
+    },
+    
+    quizChaos: {
+      enabled: true,
+      dailyLimit: 5,
+      pointsPerPlay: 3,
+      pointsPerWin: 18,
+      questionsPerQuiz: 6,
+      requiresAI: true,
+      correctAnswerBonus: 3,
+      perfectScoreBonus: 12,
+      speedBonus: 2
+    },
+    
     }
   },
 

@@ -127,11 +127,16 @@ export JWT_SECRET JWT_EXPIRES_IN
 export GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI
 export FRONTEND_URL OPENAI_API_KEY OPENAI_MODEL
 
-# Use fnm if available
+# Use fnm if available - ensure Node 20 is used
 if command -v fnm &> /dev/null; then
     eval "$(fnm env)"
-    fnm use 20 > /dev/null 2>&1
+    fnm use 20
+    export PATH="$HOME/.local/share/fnm_multishells/current/bin:$PATH"
 fi
+
+# Verify Node version
+NODE_VERSION=$(node --version 2>&1)
+echo "Using Node: $NODE_VERSION"
 
 npm start > ../backend.log 2>&1 &
 BACKEND_PID=$!
