@@ -295,6 +295,23 @@ const Dashboard = () => {
               🚀 Start Rush Now!
             </FloatingButton>
           </div>
+
+          {/* Admin Panel Card - Only show if user is admin */}
+          {user?.email === 'admin@faltuverse.com' || user?.name === 'admin' ? (
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform">
+              <h3 className="text-2xl font-black mb-4 text-white">🔐 Admin Panel</h3>
+              <p className="text-white mb-4 opacity-90">Database management aur sab kuch control karo!</p>
+              <FloatingButton
+                onClick={() => {
+                  const adminUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin`;
+                  window.open(adminUrl, '_blank');
+                }}
+                className="w-full bg-white text-purple-600 font-black"
+              >
+                Open Admin Panel 🔐
+              </FloatingButton>
+            </div>
+          ) : null}
         </div>
 
         {/* Last Lucky Draw */}

@@ -7,6 +7,7 @@ require('dotenv').config();
 const sequelize = require('./config/db');
 const { initializeChatSocket } = require('./events/socketEvents');
 const { createSystemUsers } = require('./services/systemUsersService');
+const { initializeAdminPanel } = require('./admin/adminPanel');
 
 // Import cron jobs
 const { initializeLuckyDrawCrons } = require('./cron/luckyDrawCron');
@@ -40,11 +41,17 @@ const io = new Server(server, {
 // Initialize chat socket
 initializeChatSocket(io);
 
-// Middleware
+// CORS middleware (needed early)
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
+
+// Initialize Admin Panel FIRST (before body-parser)
+// AdminJS requires to be mounted before body-parser middleware
+initializeAdminPanel(app, sequelize);
+
+// Body parser middleware (AFTER AdminJS)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
