@@ -6,6 +6,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    host: true
+    host: true,
+    allowedHosts: [
+      'faltuverse.cloud',
+      'www.faltuverse.cloud',
+      '72.61.170.102',
+      'localhost'
+    ]
   }
 })
