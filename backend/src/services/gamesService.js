@@ -504,7 +504,25 @@ const submitPoetry = async (userId, poetryId, poem) => {
   }
 };
 
-// Poetry Chaos - AI judges poetry
+// Jhand Meter - AI measures jhand level
+const getJhandMeter = async (userId) => {
+  const user = await User.findByPk(userId);
+  try {
+    const aiResponse = await callAI({
+      user,
+      reason: 'games',
+      appState: {
+        game: 'jhand_meter',
+        action: 'measure_jhand'
+      }
+    });
+    
+    const jhandScore = aiResponse?.jhand_score || Math.floor(Math.random() * 100);
+    const points = Math.floor(jhandScore * 0.1);
+    await addPoints(userId, points, 'jhand_meter', user);
+    
+    return {
+      meter_id: Date.now(),
       jhand_score: jhandScore,
       jhand_level: jhandScore < 30 ? 'low' : jhandScore < 60 ? 'medium' : jhandScore < 85 ? 'high' : 'extreme',
       message: aiResponse?.message || 'Tumhara jhand level check ho gaya!',
@@ -1840,6 +1858,7 @@ module.exports = {
   submitDesiSpeedTap,
   getCringeMeter,
   getVibeCheck,
+  getJhandMeter,
   startTimeBomb,
   defuseTimeBomb,
   submitMemeGenerator,
