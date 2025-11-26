@@ -162,6 +162,14 @@ function App() {
                 }
               />
               <Route
+                path="/games/chaos"
+                element={
+                  <ProtectedRoute>
+                    <RoomChaos />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/rush"
                 element={
                   <ProtectedRoute>

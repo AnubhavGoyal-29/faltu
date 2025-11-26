@@ -19,6 +19,10 @@ const Tambola = () => {
   const [winners, setWinners] = useState([])
   const [isRegistered, setIsRegistered] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [leaderboard, setLeaderboard] = useState({ rows: [], columns: [], fullHouse: [] })
+  const [lastRoundWinners, setLastRoundWinners] = useState(null)
+  const [registrationTimeLeft, setRegistrationTimeLeft] = useState(300) // 5 minutes
+  const [nextNumberCountdown, setNextNumberCountdown] = useState(0) // seconds until next number
   const socketRef = useRef(null)
 
   // Initialize socket
@@ -41,25 +45,79 @@ const Tambola = () => {
 
     newSocket.on('tambola_room_created', (data) => {
       console.log('🎲 New room created:', data)
+      if (data.registration_time_remaining !== undefined) {
+        setRegistrationTimeLeft(data.registration_time_remaining)
+      }
+      // Update last round winners when new registration begins
+      if (data.last_winners) {
+        setLastRoundWinners(data.last_winners)
+      }
       fetchRoom()
+    })
+    
+    newSocket.on('tambola_registration_timer', (data) => {
+      if (data.room_id === room?.room_id) {
+        setRegistrationTimeLeft(data.time_remaining)
+      }
     })
 
     newSocket.on('tambola_game_started', (data) => {
       console.log('🎲 Game started:', data)
       setGameStatus('active')
+      setLastRoundWinners(null) // Clear last round winners when game starts
+      // Refresh room data
       fetchRoom()
+      // Start fetching leaderboard
+      if (data.room_id) {
+        fetchLeaderboard(data.room_id)
+      }
     })
 
     newSocket.on('tambola_number_called', (data) => {
       console.log('🎲 Number called:', data)
       setCurrentNumber(data.number)
       setCalledNumbers(data.called_numbers || [])
+      // Update next number countdown
+      if (data.seconds_until_next !== undefined) {
+        setNextNumberCountdown(data.seconds_until_next)
+      }
+      // Refresh leaderboard after each number
+      if (room) {
+        fetchLeaderboard(room.room_id)
+      }
+    })
+
+    newSocket.on('tambola_next_number_countdown', (data) => {
+      if (data.room_id === room?.room_id) {
+        setNextNumberCountdown(data.seconds_remaining)
+      }
+    })
+
+    newSocket.on('tambola_next_number_countdown', (data) => {
+      if (data.room_id === room?.room_id) {
+        setNextNumberCountdown(data.seconds_remaining)
+      }
+    })
+
+    newSocket.on('tambola_ticket_update', (data) => {
+      console.log('🎲 Ticket updated:', data)
+      if (data.ticket && data.ticket.user_id === user?.user_id) {
+        setTicket(data.ticket)
+      }
     })
 
     newSocket.on('tambola_winner', (data) => {
       console.log('🎲 Winner:', data)
       setWinners(prev => [...prev, data.winner])
-      triggerConfettiBurst()
+      
+      // Show popper/confetti for all users when winner is announced
+      if (data.show_popper) {
+        triggerConfettiBurst()
+      }
+      
+      fetchLeaderboard() // Refresh leaderboard
+      
+      // Show notification to all active users
       alert(`${data.winner.name} ne ${data.winner.win_type} complete kar liya! 🎉`)
     })
 
@@ -69,12 +127,16 @@ const Tambola = () => {
       if (data.winner_user_id) {
         triggerConfettiBurst()
       }
+      fetchLastRoundWinners() // Fetch winners for next round
     })
 
     setSocket(newSocket)
 
     return () => {
+      // Remove all event listeners before closing
+      newSocket.removeAllListeners()
       newSocket.close()
+      socketRef.current = null
     }
   }, [token, navigate])
 
@@ -83,27 +145,99 @@ const Tambola = () => {
     try {
       const response = await api.get('/tambola/room')
       if (response.data.success) {
-        setRoom(response.data.room)
-        setGameStatus(response.data.room.status)
-        setCalledNumbers(response.data.room.called_numbers || [])
-        setCurrentNumber(response.data.room.current_number)
-        setRegisteredUsers(response.data.room.registered_users || [])
+        const roomData = response.data.room
+        setRoom(roomData)
+        setGameStatus(roomData.status)
+        setCalledNumbers(roomData.called_numbers || [])
+        setCurrentNumber(roomData.current_number)
+        setRegisteredUsers(roomData.registered_users || [])
+        
+        // Set registration time from backend
+        if (roomData.registration_time_remaining !== undefined) {
+          setRegistrationTimeLeft(roomData.registration_time_remaining)
+        }
+        
+        // Set next number countdown if game is active
+        if (roomData.status === 'active' && roomData.seconds_until_next_number !== undefined) {
+          setNextNumberCountdown(roomData.seconds_until_next_number)
+        }
         
         // Check if user is registered
-        const userRegistered = response.data.room.registered_users.some(
+        const userRegistered = roomData.registered_users.some(
           u => u.user_id === user?.user_id
         )
         setIsRegistered(userRegistered)
         
         // Fetch ticket if registered
         if (userRegistered) {
-          fetchTicket(response.data.room.room_id)
+          fetchTicket(roomData.room_id)
+        }
+        
+        // Fetch leaderboard if game is active
+        if (roomData.status === 'active') {
+          fetchLeaderboard(roomData.room_id)
+        }
+        
+        // Fetch last round winners if in waiting status
+        if (roomData.status === 'waiting') {
+          fetchLastRoundWinners()
         }
       }
     } catch (error) {
       console.error('Fetch room error:', error)
     }
   }
+  
+  // Fetch leaderboard
+  const fetchLeaderboard = async (roomId) => {
+    if (!roomId && !room) return
+    try {
+      const response = await api.get(`/tambola/leaderboard/${roomId || room.room_id}`)
+      if (response.data.success) {
+        setLeaderboard(response.data.leaderboard)
+      }
+    } catch (error) {
+      console.error('Fetch leaderboard error:', error)
+    }
+  }
+  
+  // Fetch last round winners
+  const fetchLastRoundWinners = async () => {
+    try {
+      const response = await api.get('/tambola/last-winners')
+      if (response.data.success && response.data.winners) {
+        setLastRoundWinners(response.data.winners)
+      }
+    } catch (error) {
+      console.error('Fetch last winners error:', error)
+    }
+  }
+  
+  // Registration countdown timer - sync with backend
+  useEffect(() => {
+    if (gameStatus === 'waiting') {
+      // First, use backend-provided time if available
+      if (room?.registration_time_remaining !== undefined && room.registration_time_remaining > 0) {
+        setRegistrationTimeLeft(room.registration_time_remaining)
+      }
+      
+      // Then set up interval to countdown
+      if (room?.registration_end_at) {
+        const interval = setInterval(() => {
+          const now = new Date().getTime()
+          const endTime = new Date(room.registration_end_at).getTime()
+          const remaining = Math.max(0, Math.floor((endTime - now) / 1000))
+          setRegistrationTimeLeft(remaining)
+          
+          if (remaining === 0) {
+            clearInterval(interval)
+          }
+        }, 1000)
+        
+        return () => clearInterval(interval)
+      }
+    }
+  }, [gameStatus, room])
 
   // Fetch user's ticket
   const fetchTicket = async (roomId) => {
@@ -147,12 +281,12 @@ const Tambola = () => {
     return ticket.marked_numbers?.includes(num) || false
   }
 
-  // Check if number is in ticket
+  // Check if number is in ticket (3x3 grid)
   const isNumberInTicket = (num) => {
     if (!ticket || !num) return false
     const ticketNumbers = ticket.ticket_numbers || []
     for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 9; col++) {
+      for (let col = 0; col < 3; col++) {
         if (ticketNumbers[row]?.[col] === num) {
           return true
         }
@@ -217,19 +351,53 @@ const Tambola = () => {
               {gameStatus === 'completed' && '🏆 Game Completed'}
             </h2>
             
-            {!isRegistered && gameStatus === 'waiting' && (
-              <FloatingButton
-                onClick={handleRegister}
-                disabled={loading}
-                className="bg-green-600 text-white px-8 py-4 text-lg"
-              >
-                {loading ? 'Registering...' : 'Register Karo! 🎫'}
-              </FloatingButton>
+            {/* Registration Phase */}
+            {gameStatus === 'waiting' && (
+              <>
+                {!isRegistered ? (
+                  <>
+                    <p className="text-lg text-gray-700 mb-4">
+                      Game start hoga: <span className="font-bold text-purple-600">
+                        {Math.floor(registrationTimeLeft / 60)}:{(registrationTimeLeft % 60).toString().padStart(2, '0')}
+                      </span> mein
+                    </p>
+                    <FloatingButton
+                      onClick={handleRegister}
+                      disabled={loading}
+                      className="bg-green-600 text-white px-8 py-4 text-lg"
+                    >
+                      {loading ? 'Registering...' : 'Register Karo! 🎫'}
+                    </FloatingButton>
+                  </>
+                ) : (
+                  <p className="text-xl text-green-600 font-bold">
+                    ✅ Registered! Game start hoga: <span className="text-purple-600">
+                      {Math.floor(registrationTimeLeft / 60)}:{(registrationTimeLeft % 60).toString().padStart(2, '0')}
+                    </span> mein
+                  </p>
+                )}
+              </>
             )}
             
-            {isRegistered && gameStatus === 'waiting' && (
-              <p className="text-xl text-green-600 font-bold">
-                ✅ Registered! Game start hone ka wait karo...
+            {/* Active Game - Not Registered */}
+            {gameStatus === 'active' && !isRegistered && (
+              <div className="bg-yellow-100 rounded-2xl p-6">
+                <p className="text-xl text-yellow-800 font-bold mb-2">
+                  ⚠️ Game Already Started!
+                </p>
+                <p className="text-lg text-yellow-700">
+                  Aap register nahi kar paye. Please wait for the game to finish.
+                </p>
+                <p className="text-sm text-yellow-600 mt-2">
+                  Next game mein register kar sakte ho!
+                </p>
+              </div>
+            )}
+            
+            {/* Active Game - Registered */}
+            {gameStatus === 'active' && isRegistered && (
+              <p className="text-xl text-blue-600 font-bold">
+                🎮 Game chal rahi hai! Apna ticket check karo!
               </p>
             )}
           </div>
@@ -239,28 +407,11 @@ const Tambola = () => {
             <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl">
               <h3 className="text-2xl font-black mb-4 text-center">Your Ticket 🎫</h3>
               
-              {/* Column headers */}
-              <div className="grid grid-cols-9 gap-2 mb-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(col => (
-                  <div key={col} className="text-center text-xs font-bold text-gray-600">
-                    {col === 1 && '1-9'}
-                    {col === 2 && '10-19'}
-                    {col === 3 && '20-29'}
-                    {col === 4 && '30-39'}
-                    {col === 5 && '40-49'}
-                    {col === 6 && '50-59'}
-                    {col === 7 && '60-69'}
-                    {col === 8 && '70-79'}
-                    {col === 9 && '80-90'}
-                  </div>
-                ))}
-              </div>
-              
-              {/* Ticket rows */}
+              {/* 3x3 Ticket Grid */}
               <div className="space-y-2">
                 {[0, 1, 2].map(row => (
-                  <div key={row} className="grid grid-cols-9 gap-2">
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(col => renderTicketCell(row, col))}
+                  <div key={row} className="grid grid-cols-3 gap-2">
+                    {[0, 1, 2].map(col => renderTicketCell(row, col))}
                   </div>
                 ))}
               </div>
@@ -280,8 +431,15 @@ const Tambola = () => {
           {gameStatus === 'active' && currentNumber && (
             <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl text-center">
               <p className="text-sm text-gray-600 mb-2">Current Number</p>
-              <div className="text-8xl font-black text-red-600 animate-bounce">
+              <div className="text-8xl font-black text-red-600 animate-bounce mb-4">
                 {currentNumber}
+              </div>
+              {/* Next Number Countdown */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-600 mb-1">Next Number In</p>
+                <div className="text-4xl font-black text-purple-600">
+                  {nextNumberCountdown}s
+                </div>
               </div>
             </div>
           )}
@@ -289,6 +447,100 @@ const Tambola = () => {
 
         {/* Right: Sidebar */}
         <div className="space-y-6">
+          {/* Registration Timer */}
+          {gameStatus === 'waiting' && (
+            <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl text-center">
+              <h3 className="text-xl font-black mb-2">Registration Time</h3>
+              <div className="text-4xl font-black text-purple-600">
+                {Math.floor(registrationTimeLeft / 60)}:{(registrationTimeLeft % 60).toString().padStart(2, '0')}
+              </div>
+            </div>
+          )}
+
+          {/* Last Round Winners (during registration) */}
+          {gameStatus === 'waiting' && lastRoundWinners && (
+            <div className="bg-yellow-100 rounded-3xl p-6 shadow-2xl">
+              <h3 className="text-xl font-black mb-4 text-yellow-800">Last Round Winners 🏆</h3>
+              
+              {lastRoundWinners.fullHouse.length > 0 && (
+                <div className="mb-4">
+                  <p className="font-bold text-yellow-900 mb-2">Full House:</p>
+                  {lastRoundWinners.fullHouse.map((w, idx) => (
+                    <div key={idx} className="p-2 bg-white rounded mb-1">
+                      <span className="font-bold">{w.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {lastRoundWinners.rows.length > 0 && (
+                <div className="mb-4">
+                  <p className="font-bold text-yellow-900 mb-2">Rows:</p>
+                  {lastRoundWinners.rows.map((w, idx) => (
+                    <div key={idx} className="p-2 bg-white rounded mb-1">
+                      <span className="font-bold">{w.name}</span> - {w.completion}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {lastRoundWinners.columns.length > 0 && (
+                <div>
+                  <p className="font-bold text-yellow-900 mb-2">Columns:</p>
+                  {lastRoundWinners.columns.map((w, idx) => (
+                    <div key={idx} className="p-2 bg-white rounded mb-1">
+                      <span className="font-bold">{w.name}</span> - {w.completion}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Leaderboard (during active game) */}
+          {gameStatus === 'active' && (
+            <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl">
+              <h3 className="text-xl font-black mb-4">Leaderboard 🏆</h3>
+              
+              {leaderboard.fullHouse.length > 0 && (
+                <div className="mb-4">
+                  <p className="font-bold text-green-800 mb-2">Full House:</p>
+                  {leaderboard.fullHouse.map((w, idx) => (
+                    <div key={idx} className="p-2 bg-green-100 rounded mb-1">
+                      <span className="font-bold">{w.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {leaderboard.rows.length > 0 && (
+                <div className="mb-4">
+                  <p className="font-bold text-blue-800 mb-2">Rows Completed:</p>
+                  {leaderboard.rows.map((w, idx) => (
+                    <div key={idx} className="p-2 bg-blue-100 rounded mb-1">
+                      <span className="font-bold">{w.name}</span> - {w.completion.replace('row_', 'Row ')}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {leaderboard.columns.length > 0 && (
+                <div>
+                  <p className="font-bold text-purple-800 mb-2">Columns Completed:</p>
+                  {leaderboard.columns.map((w, idx) => (
+                    <div key={idx} className="p-2 bg-purple-100 rounded mb-1">
+                      <span className="font-bold">{w.name}</span> - {w.completion.replace('col_', 'Column ')}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {leaderboard.rows.length === 0 && leaderboard.columns.length === 0 && leaderboard.fullHouse.length === 0 && (
+                <p className="text-gray-600 text-center">No completions yet...</p>
+              )}
+            </div>
+          )}
+
           {/* Called Numbers Board */}
           {calledNumbers.length > 0 && (
             <div className="bg-white bg-opacity-90 rounded-3xl p-6 shadow-2xl">
@@ -336,32 +588,10 @@ const Tambola = () => {
                     </div>
                   )}
                   <span className="font-bold text-sm">{player.name}</span>
-                  {winners.some(w => w.user_id === player.user_id) && (
-                    <span className="ml-auto text-green-600">🏆</span>
-                  )}
                 </div>
               ))}
             </div>
           </div>
-
-          {/* Winners List */}
-          {winners.length > 0 && (
-            <div className="bg-green-100 rounded-3xl p-6 shadow-2xl">
-              <h3 className="text-xl font-black mb-4 text-green-800">Winners 🏆</h3>
-              <div className="space-y-2">
-                {winners.map((winner, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 bg-white rounded-lg border-2 border-green-500"
-                  >
-                    <p className="font-bold text-green-800">
-                      {winner.name} - {winner.win_type}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 const { UserPoints } = require('../models');
-const { generateRewardSuggestion, isAIEnabled } = require('./aiDecisionEngine');
+const { generateRewardSuggestion, isAIEnabled } = require('../ai/handlers/aiDecisionEngine');
 
 // Add points to user
 const addPoints = async (userId, points, reason = '', user = null, context = {}) => {

@@ -19,6 +19,11 @@ const TambolaRoom = sequelize.define('TambolaRoom', {
     type: DataTypes.INTEGER,
     allowNull: true
   },
+  completed_win_types: {
+    type: DataTypes.JSON,
+    defaultValue: [],
+    comment: 'Track which win types have been won: ["row_1", "row_2", "row_3", "col_1", "col_2", "col_3", "full_house"]'
+  },
   winner_user_id: {
     type: DataTypes.INTEGER,
     allowNull: true,
@@ -26,6 +31,11 @@ const TambolaRoom = sequelize.define('TambolaRoom', {
       model: 'users',
       key: 'user_id'
     }
+  },
+  registration_end_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'When registration period ends (5 minutes after created_at)'
   },
   started_at: {
     type: DataTypes.DATE,

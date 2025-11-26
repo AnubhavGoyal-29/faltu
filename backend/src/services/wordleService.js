@@ -1,4 +1,4 @@
-const { isAIEnabled, callAI } = require('./aiDecisionEngine');
+const { isAIEnabled, callAI } = require('../ai/handlers/aiDecisionEngine');
 const { addPoints } = require('./pointsService');
 
 // Hinglish words for Wordle (5-letter words)

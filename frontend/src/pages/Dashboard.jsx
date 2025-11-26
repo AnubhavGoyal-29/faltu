@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useChaos } from '../context/ChaosContext'
@@ -51,52 +51,8 @@ const Dashboard = () => {
     setShowPopup(true)
   })
 
-  useEffect(() => {
-    // Only fetch if user is loaded
-    if (user) {
-      fetchDashboardData()
-      checkRushActivities()
-    }
-    
-    // Rotate quotes
-    const quoteInterval = setInterval(() => {
-      setCurrentQuote(stupidQuotes[Math.floor(Math.random() * stupidQuotes.length)])
-    }, 5000)
-
-    // Random button wiggle
-    const wiggleInterval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        setButtonWiggle(true)
-        setTimeout(() => setButtonWiggle(false), 1000)
-      }
-    }, 8000)
-
-    return () => {
-      clearInterval(quoteInterval)
-      clearInterval(wiggleInterval)
-    }
-  }, [user])
-
-  const checkRushActivities = async () => {
-    try {
-      console.log('🎯 [DASHBOARD] Checking for rush activities...')
-      const response = await api.get('/rush/available')
-      console.log('🎯 [DASHBOARD] Rush available response:', response.data)
-      
-      if (response.data.success && response.data.has_available) {
-        console.log('🎯 [DASHBOARD] Rush activities available! Redirecting...')
-        // Redirect to rush activity
-        navigate('/rush', { replace: true })
-      } else {
-        console.log('🎯 [DASHBOARD] No rush activities available, showing dashboard')
-      }
-    } catch (error) {
-      console.error('🎯 [DASHBOARD] Failed to check rush activities:', error)
-      // Continue showing dashboard if check fails
-    }
-  }
-
-  const fetchDashboardData = async () => {
+  // Define callbacks BEFORE useEffect that uses them
+  const fetchDashboardData = useCallback(async () => {
     try {
       const profileResponse = await api.get('/users/profile')
       if (profileResponse.data?.points) {
@@ -127,9 +83,57 @@ const Dashboard = () => {
       }
       setLastDraw(null)
     }
-  }
+  }, [points, loginStreak])
 
-  const handleTriggerChaos = async () => {
+  const checkRushActivities = useCallback(async () => {
+    try {
+      console.log('🎯 [DASHBOARD] Checking for rush activities...')
+      const response = await api.get('/rush/available')
+      console.log('🎯 [DASHBOARD] Rush available response:', response.data)
+      
+      if (response.data.success && response.data.has_available) {
+        console.log('🎯 [DASHBOARD] Rush activities available! Redirecting...')
+        // Redirect to rush activity
+        navigate('/rush', { replace: true })
+      } else {
+        console.log('🎯 [DASHBOARD] No rush activities available, showing dashboard')
+      }
+    } catch (error) {
+      console.error('🎯 [DASHBOARD] Failed to check rush activities:', error)
+      // Continue showing dashboard if check fails
+    }
+  }, [navigate])
+
+  useEffect(() => {
+    // Only fetch if user is loaded
+    if (user) {
+      fetchDashboardData()
+      checkRushActivities()
+    }
+  }, [user, fetchDashboardData, checkRushActivities]) // Include stable callbacks
+
+  // Separate effect for UI animations to prevent re-fetching on quote changes
+  useEffect(() => {
+    // Rotate quotes
+    const quoteInterval = setInterval(() => {
+      setCurrentQuote(stupidQuotes[Math.floor(Math.random() * stupidQuotes.length)])
+    }, 5000)
+
+    // Random button wiggle
+    const wiggleInterval = setInterval(() => {
+      if (Math.random() > 0.7) {
+        setButtonWiggle(true)
+        setTimeout(() => setButtonWiggle(false), 1000)
+      }
+    }, 8000)
+
+    return () => {
+      clearInterval(quoteInterval)
+      clearInterval(wiggleInterval)
+    }
+  }, []) // Empty deps - only run once on mount
+
+  const handleTriggerChaos = useCallback(async () => {
     triggerConfettiBurst()
     triggerDiscoMode(3000)
     setButtonWiggle(true)
@@ -139,7 +143,7 @@ const Dashboard = () => {
     setTimeout(() => {
       fetchDashboardData()
     }, 1000)
-  }
+  }, [triggerChaos, fetchDashboardData])
 
   // Show loading if user not loaded yet
   if (!user) {

@@ -13,6 +13,7 @@ const Login = () => {
   const [showEmailLogin, setShowEmailLogin] = useState(false)
   const [emailCreds, setEmailCreds] = useState({ email: '', password: '', name: '' })
   const [emailLoading, setEmailLoading] = useState(false)
+  const [faltuConfirmed, setFaltuConfirmed] = useState(false)
   const buttonRef = useRef(null)
   const moveIntervalRef = useRef(null)
 
@@ -70,8 +71,22 @@ const Login = () => {
     }
   }, [])
 
+  const handleGoogleLogin = () => {
+    if (!faltuConfirmed) {
+      alert('Pehle confirm karo ki tum faltu ho! 😄')
+      return
+    }
+    login()
+  }
+
   const handleEmailLogin = async (e) => {
     e.preventDefault()
+    
+    if (!faltuConfirmed) {
+      alert('Pehle confirm karo ki tum faltu ho! 😄')
+      return
+    }
+    
     setEmailLoading(true)
     try {
       const response = await api.post('/auth/email', {
@@ -141,11 +156,27 @@ const Login = () => {
           </p>
         </div>
 
+        {/* Faltu Confirmation Checkbox - Always visible */}
+        <div className={`bg-white bg-opacity-90 rounded-2xl p-4 max-w-md mx-auto shadow-xl ${isMoving ? 'mt-8' : 'mt-4'}`}>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={faltuConfirmed}
+              onChange={(e) => setFaltuConfirmed(e.target.checked)}
+              className="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+            />
+            <span className="text-gray-800 font-semibold text-sm">
+              ✅ Confirm that you are <span className="text-purple-600 font-bold">FALTU</span> now and do not have anything productive to do
+            </span>
+          </label>
+        </div>
+
         {isMoving ? (
           <button
-            onClick={login}
-            className="bg-white text-purple-600 hover:bg-purple-100 shadow-2xl px-6 py-4 rounded-2xl font-bold text-lg cursor-pointer"
+            onClick={handleGoogleLogin}
+            className={`bg-white text-purple-600 hover:bg-purple-100 shadow-2xl px-6 py-4 rounded-2xl font-bold text-lg cursor-pointer ${!faltuConfirmed ? 'opacity-50 cursor-not-allowed' : ''}`}
             style={buttonStyle}
+            disabled={!faltuConfirmed}
           >
             <span className="flex items-center gap-3 whitespace-nowrap">
               <span className="text-2xl">🚀</span>
@@ -153,10 +184,11 @@ const Login = () => {
             </span>
           </button>
         ) : (
-          <div className="mt-12 space-y-4">
+          <div className="mt-4 space-y-4">
             <FloatingButton
-              onClick={login}
-              className="bg-white text-purple-600 hover:bg-purple-100 shadow-2xl"
+              onClick={handleGoogleLogin}
+              className={`bg-white text-purple-600 hover:bg-purple-100 shadow-2xl ${!faltuConfirmed ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!faltuConfirmed}
             >
               <span className="flex items-center gap-3 whitespace-nowrap">
                 <span className="text-2xl">🚀</span>
@@ -211,11 +243,17 @@ const Login = () => {
                 
                 <button
                   type="submit"
-                  disabled={emailLoading}
-                  className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors disabled:opacity-50"
+                  disabled={emailLoading || !faltuConfirmed}
+                  className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {emailLoading ? 'Logging in...' : 'Login / Sign Up'}
                 </button>
+                
+                {!faltuConfirmed && (
+                  <p className="text-xs text-red-600 text-center font-semibold">
+                    ⚠️ Pehle faltu confirm karo! 😄
+                  </p>
+                )}
                 
                 <p className="text-xs text-gray-600 text-center">
                   Agar user nahi hai, naya account ban jayega automatically!

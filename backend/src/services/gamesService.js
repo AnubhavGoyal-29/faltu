@@ -21,7 +21,7 @@ const {
   generateFuturePrediction,
   generateDare,
   generateRoast
-} = require('./gamesAIService');
+} = require('../ai/handlers/gamesAIService');
 const { addPoints } = require('./pointsService');
 
 // Daily Bakchodi Challenge
@@ -87,28 +87,111 @@ const submitBakchodiChallenge = async (userId, submission) => {
 };
 
 // Debate
+// Start new debate
 const startDebate = async (userId) => {
   const topic = await generateDebateTopic();
-  return { topic };
-};
-
-const submitDebate = async (userId, topic, userArgument) => {
-  const user = await User.findByPk(userId);
-  const { counterArgument, winner, explanation } = await generateDebateResponse(user, topic, userArgument);
   
+  // Create debate with initial state
   const debate = await Debate.create({
     user_id: userId,
     topic,
-    user_argument: userArgument,
-    ai_counter_argument: counterArgument,
-    winner,
-    ai_explanation: explanation
+    messages: [],
+    status: 'active',
+    winner: null
   });
+  
+  return { debate_id: debate.debate_id, topic };
+};
 
-  // Award points
-  const points = winner === 'user' ? 100 : 50;
-  await addPoints(userId, points, 'debate', user);
+// Add message to debate (user or AI)
+const addDebateMessage = async (debateId, sender, message) => {
+  const debate = await Debate.findByPk(debateId);
+  if (!debate) {
+    throw new Error('Debate nahi mila');
+  }
+  
+  if (debate.status !== 'active') {
+    throw new Error('Debate already completed');
+  }
+  
+  const messages = debate.messages || [];
+  messages.push({
+    sender,
+    message,
+    timestamp: new Date().toISOString()
+  });
+  
+  await debate.update({
+    messages,
+    updated_at: new Date()
+  });
+  
+  return debate;
+};
 
+// Get AI response in debate
+const getAIResponse = async (debateId, userId) => {
+  const debate = await Debate.findByPk(debateId);
+  if (!debate) {
+    throw new Error('Debate nahi mila');
+  }
+  
+  const user = await User.findByPk(userId);
+  const messages = debate.messages || [];
+  
+  // Get last few messages for context
+  const recentMessages = messages.slice(-6);
+  
+  // Generate AI response
+  const aiResponse = await generateDebateResponse(user, debate.topic, recentMessages);
+  
+  // Add AI message
+  await addDebateMessage(debateId, 'ai', aiResponse.message);
+  
+  // Check if debate should end (AI decides winner after 10+ messages)
+  const updatedDebate = await Debate.findByPk(debateId);
+  const totalMessages = (updatedDebate.messages || []).length;
+  
+  if (totalMessages >= 10 && aiResponse.shouldEnd) {
+    // AI decides winner
+    await updatedDebate.update({
+      status: aiResponse.winner === 'user' ? 'user_won' : 'ai_won',
+      winner: aiResponse.winner,
+      ai_explanation: aiResponse.explanation
+    });
+    
+    // Award points
+    const points = aiResponse.winner === 'user' ? 200 : 100;
+    await addPoints(userId, points, 'debate', user);
+  }
+  
+  return updatedDebate;
+};
+
+// User forfeits debate
+const forfeitDebate = async (debateId, userId) => {
+  const debate = await Debate.findByPk(debateId);
+  if (!debate || debate.user_id !== userId) {
+    throw new Error('Debate nahi mila');
+  }
+  
+  await debate.update({
+    status: 'user_forfeit',
+    winner: 'ai',
+    ai_explanation: 'User ne forfeit kar diya'
+  });
+  
+  return debate;
+};
+
+// Submit user message in debate
+const submitDebateMessage = async (debateId, userId, message) => {
+  // Add user message
+  await addDebateMessage(debateId, 'user', message);
+  
+  // Get AI response
+  const debate = await getAIResponse(debateId, userId);
+  
   return debate;
 };
 
@@ -124,10 +207,11 @@ const getRandomMemeImage = () => {
   return images[Math.floor(Math.random() * images.length)];
 };
 
-const submitMemeCaption = async (userId, caption) => {
+const submitMemeCaption = async (userId, caption, user = null) => {
   const imageUrl = getRandomMemeImage();
-  const user = await User.findByPk(userId);
-  const { humor, creativity, nonsense } = await scoreMemeCaption(user, imageUrl, caption);
+  // Only fetch user if not provided (for backward compatibility)
+  const userData = user || await User.findByPk(userId);
+  const { humor, creativity, nonsense } = await scoreMemeCaption(userData, imageUrl, caption);
   const totalScore = humor + creativity + nonsense;
   
   const battle = await MemeBattle.create({
@@ -141,7 +225,7 @@ const submitMemeCaption = async (userId, caption) => {
   });
 
   // Award points
-  await addPoints(userId, Math.floor(totalScore / 10), 'meme_battle', user);
+  await addPoints(userId, Math.floor(totalScore / 10), 'meme_battle', userData);
 
   return battle;
 };
@@ -246,10 +330,16 @@ const getDare = async (userId) => {
   });
 };
 
-// Roast Me
+// Roast Me - Always use AI
 const getRoast = async (userId) => {
   const user = await User.findByPk(userId);
+  
+  // Always use AI for roasts
   const roastText = await generateRoast(user);
+  
+  if (!roastText) {
+    throw new Error('Roast generate nahi hui');
+  }
   
   return await Roast.create({
     user_id: userId,
@@ -261,7 +351,10 @@ module.exports = {
   getTodayChallenge,
   submitBakchodiChallenge,
   startDebate,
-  submitDebate,
+  submitDebateMessage,
+  addDebateMessage,
+  getAIResponse,
+  forfeitDebate,
   getRandomMemeImage,
   submitMemeCaption,
   spinWheel,
@@ -270,7 +363,6 @@ module.exports = {
   getTapLeaderboard,
   recordRunawayButtonWin,
   getDare,
-  getRoast,
-  getRandomMemeImage
+  getRoast
 };
 

@@ -34,7 +34,8 @@ const RushActivity = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { activityType } = useParams()
-  const [loading, setLoading] = useState(true)
+  // Set initial loading based on whether activityType exists
+  const [loading, setLoading] = useState(!activityType || !ACTIVITY_COMPONENTS[activityType])
   const [activityData, setActivityData] = useState(null)
   const [showSkipButton, setShowSkipButton] = useState(true)
 
@@ -42,8 +43,18 @@ const RushActivity = () => {
     if (!activityType) {
       // If no activity type, get next rush activity
       fetchNextActivity()
+    } else if (ACTIVITY_COMPONENTS[activityType]) {
+      // If activityType exists and is valid, mark as visited and set loading to false
+      setLoading(false)
+      // Mark activity as visited when component loads
+      api.post('/rush/complete', {
+        activity_type: activityType,
+        status: 'seen'
+      }).catch(err => console.error('Failed to mark as seen:', err))
+    } else {
+      // Invalid activity type
+      setLoading(false)
     }
-    // If activityType exists, component will render it directly
   }, [activityType])
 
   const fetchNextActivity = async () => {
@@ -70,19 +81,6 @@ const RushActivity = () => {
       setLoading(false)
     }
   }
-
-  // When activityType is provided, just mark it as visited and render
-  useEffect(() => {
-    if (activityType && ACTIVITY_COMPONENTS[activityType]) {
-      // Mark activity as visited when component loads
-      api.post('/rush/complete', {
-        activity_type: activityType,
-        status: 'seen'
-      }).catch(err => console.error('Failed to mark as seen:', err))
-      
-      setLoading(false)
-    }
-  }, [activityType])
 
   const handleSkip = async () => {
     try {

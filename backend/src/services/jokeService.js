@@ -1,4 +1,4 @@
-const { isAIEnabled, callAI } = require('./aiDecisionEngine');
+const { isAIEnabled, callAI } = require('../ai/handlers/aiDecisionEngine');
 
 // Hinglish jokes (naughty allowed)
 const hinglishJokes = [

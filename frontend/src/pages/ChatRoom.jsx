@@ -80,7 +80,10 @@ const ChatRoom = () => {
     setSocket(newSocket)
 
     return () => {
+      // Remove all event listeners before closing
+      newSocket.removeAllListeners()
       newSocket.close()
+      socketRef.current = null
     }
   }, [token, navigate])
 

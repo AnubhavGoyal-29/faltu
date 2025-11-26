@@ -1,6 +1,6 @@
 const { ChaosEvent, User } = require('../models');
 const { addPoints } = require('./pointsService');
-const { generateChaosAction, isAIEnabled } = require('./aiDecisionEngine');
+const { generateChaosAction, isAIEnabled } = require('../ai/handlers/aiDecisionEngine');
 const { getRandomChaosAnimation, getChaosAnimationConfig, CHAOS_ANIMATION_TYPES } = require('./chaosAnimations');
 
 // Chaos event types

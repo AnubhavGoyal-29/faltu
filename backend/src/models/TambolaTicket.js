@@ -35,6 +35,10 @@ const TambolaTicket = sequelize.define('TambolaTicket', {
     type: DataTypes.JSON,
     defaultValue: []
   },
+  completed_columns: {
+    type: DataTypes.JSON,
+    defaultValue: []
+  },
   has_won: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
