@@ -18,6 +18,7 @@ const Dare = require('./Dare');
 const Roast = require('./Roast');
 const GameRoom = require('./GameRoom');
 const GameRoomUser = require('./GameRoomUser');
+const UserActivityTracking = require('./UserActivityTracking');
 
 // Define associations
 ChatMessage.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -54,6 +55,10 @@ GameRoomUser.belongsTo(GameRoom, { foreignKey: 'game_room_id', as: 'room' });
 GameRoomUser.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 GameRoom.hasMany(GameRoomUser, { foreignKey: 'game_room_id', as: 'users' });
 
+// UserActivityTracking associations
+UserActivityTracking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+User.hasMany(UserActivityTracking, { foreignKey: 'user_id', as: 'activityTracking' });
+
 module.exports = {
   sequelize,
   User,
@@ -74,6 +79,7 @@ module.exports = {
   Dare,
   Roast,
   GameRoom,
-  GameRoomUser
+  GameRoomUser,
+  UserActivityTracking
 };
 

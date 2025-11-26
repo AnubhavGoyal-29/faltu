@@ -31,6 +31,7 @@ const chaosRoutes = require('./routes/chaosRoutes');
 const wordleRoutes = require('./routes/wordleRoutes');
 const tambolaRoutes = require('./routes/tambolaRoutes');
 const gamesRoutes = require('./routes/gamesRoutes');
+const rushRoutes = require('./routes/rushRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +65,7 @@ app.use('/api/chaos', chaosRoutes);
 app.use('/api/wordle', wordleRoutes);
 app.use('/api/tambola', tambolaRoutes);
 app.use('/api/games', gamesRoutes);
+app.use('/api/rush', rushRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

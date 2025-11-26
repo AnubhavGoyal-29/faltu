@@ -1,4 +1,4 @@
-const { verifyGoogleToken, findOrCreateUser, updateLoginStreak, generateToken } = require('../services/authService');
+const { verifyGoogleToken, findOrCreateUser, findOrCreateUserWithPassword, updateLoginStreak, generateToken } = require('../services/authService');
 const { addPoints } = require('../services/pointsService');
 const { generateWelcomeMessage } = require('../services/aiDecisionEngine');
 const { User, UserPoints } = require('../models');
@@ -132,8 +132,88 @@ const googleLogin = async (req, res) => {
   }
 };
 
+// Email/Password login endpoint
+const emailPasswordLogin = async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+    console.log('🔐 [AUTH] Email/password login request received');
+
+    if (!email || !password) {
+      console.error('🔐 [AUTH] ❌ Email or password missing');
+      return res.status(400).json({ error: 'Email aur password dono chahiye bhai!' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Valid email daalo bhai!' });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password kam se kam 6 characters ka hona chahiye!' });
+    }
+
+    console.log('🔐 [AUTH] Finding or creating user with email/password...');
+    // Find or create user
+    const user = await findOrCreateUserWithPassword(email, password, name);
+    console.log('🔐 [AUTH] ✅ User found/created:', user.user_id);
+
+    // Update login streak
+    const streak = await updateLoginStreak(user.user_id);
+    console.log('🔐 [AUTH] Login streak:', streak);
+
+    // Award points for login (10 points) - with AI suggestion
+    await addPoints(user.user_id, 10, 'daily_login', {
+      user_id: user.user_id,
+      name: user.name,
+      email: user.email
+    }, { login_streak: streak });
+
+    // Generate JWT token
+    const jwtToken = generateToken(user.user_id);
+    console.log('🔐 [AUTH] ✅ JWT token generated');
+
+    // Generate AI welcome message (non-blocking)
+    let welcomeMessage = null;
+    try {
+      welcomeMessage = await generateWelcomeMessage({
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email
+      });
+    } catch (error) {
+      console.error('Welcome message generation error:', error);
+    }
+
+    console.log('🔐 [AUTH] ✅ Login successful for user:', user.name);
+    res.json({
+      token: jwtToken,
+      user: {
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+        profile_photo: user.profile_photo
+      },
+      login_streak: streak,
+      welcome_message: welcomeMessage,
+      is_new_user: !user.password || user.created_at > new Date(Date.now() - 60000) // Created less than 1 minute ago
+    });
+  } catch (error) {
+    console.error('🔐 [AUTH] ❌ Email/password login error:', error);
+    console.error('🔐 [AUTH] Error stack:', error.stack);
+    
+    if (error.message.includes('password')) {
+      return res.status(401).json({ error: error.message });
+    }
+    
+    res.status(500).json({ error: error.message || 'Login failed' });
+  }
+};
+
 module.exports = {
   googleLogin,
-  adminLogin
+  adminLogin,
+  emailPasswordLogin
 };
 

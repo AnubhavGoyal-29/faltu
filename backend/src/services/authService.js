@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const { User, UserPoints } = require('../models');
 
@@ -147,10 +148,75 @@ const generateToken = (userId) => {
   );
 };
 
+// Hash password
+const hashPassword = async (password) => {
+  const saltRounds = 10;
+  return await bcrypt.hash(password, saltRounds);
+};
+
+// Verify password
+const verifyPassword = async (password, hashedPassword) => {
+  if (!hashedPassword) {
+    return false;
+  }
+  return await bcrypt.compare(password, hashedPassword);
+};
+
+// Find or create user with email/password
+const findOrCreateUserWithPassword = async (email, password, name) => {
+  // Check if user exists
+  let user = await User.findOne({ where: { email } });
+
+  if (user) {
+    // User exists, verify password
+    if (!user.password) {
+      // User exists but no password set (maybe created via Google)
+      // Set password for this user
+      const hashedPassword = await hashPassword(password);
+      user.password = hashedPassword;
+      if (name && !user.name) {
+        user.name = name;
+      }
+      await user.save();
+      return user;
+    }
+
+    // Verify password
+    const isValid = await verifyPassword(password, user.password);
+    if (!isValid) {
+      throw new Error('Galat password hai bhai!');
+    }
+
+    return user;
+  } else {
+    // Create new user
+    const hashedPassword = await hashPassword(password);
+    user = await User.create({
+      email: email,
+      name: name || email.split('@')[0], // Use email prefix as name if not provided
+      password: hashedPassword,
+      profile_photo: null,
+      google_id: null
+    });
+
+    // Initialize user points
+    await UserPoints.create({
+      user_id: user.user_id,
+      total_points: 0,
+      login_streak: 0
+    });
+
+    return user;
+  }
+};
+
 module.exports = {
   verifyGoogleToken,
   findOrCreateUser,
+  findOrCreateUserWithPassword,
   updateLoginStreak,
-  generateToken
+  generateToken,
+  hashPassword,
+  verifyPassword
 };
 

@@ -55,6 +55,7 @@ const Dashboard = () => {
     // Only fetch if user is loaded
     if (user) {
       fetchDashboardData()
+      checkRushActivities()
     }
     
     // Rotate quotes
@@ -75,6 +76,25 @@ const Dashboard = () => {
       clearInterval(wiggleInterval)
     }
   }, [user])
+
+  const checkRushActivities = async () => {
+    try {
+      console.log('🎯 [DASHBOARD] Checking for rush activities...')
+      const response = await api.get('/rush/available')
+      console.log('🎯 [DASHBOARD] Rush available response:', response.data)
+      
+      if (response.data.success && response.data.has_available) {
+        console.log('🎯 [DASHBOARD] Rush activities available! Redirecting...')
+        // Redirect to rush activity
+        navigate('/rush', { replace: true })
+      } else {
+        console.log('🎯 [DASHBOARD] No rush activities available, showing dashboard')
+      }
+    } catch (error) {
+      console.error('🎯 [DASHBOARD] Failed to check rush activities:', error)
+      // Continue showing dashboard if check fails
+    }
+  }
 
   const fetchDashboardData = async () => {
     try {
@@ -258,6 +278,17 @@ const Dashboard = () => {
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white"
             >
               Play Games 🎮
+            </FloatingButton>
+          </div>
+          
+          <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform animate-pulse-crazy">
+            <h3 className="text-2xl font-black mb-4 text-white">⚡ Start Rush</h3>
+            <p className="text-white mb-4 opacity-90">Complete all unvisited activities one by one!</p>
+            <FloatingButton
+              onClick={() => navigate('/rush')}
+              className="w-full bg-white text-red-600 font-black"
+            >
+              🚀 Start Rush Now!
             </FloatingButton>
           </div>
         </div>

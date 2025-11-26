@@ -20,6 +20,7 @@ import RunawayButton from './pages/games/RunawayButton'
 import DareMachine from './pages/games/DareMachine'
 import RoastMe from './pages/games/RoastMe'
 import RoomChaos from './pages/games/RoomChaos'
+import RushActivity from './pages/RushActivity'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
@@ -157,6 +158,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <RoomChaos />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/rush"
+                element={
+                  <ProtectedRoute>
+                    <RushActivity />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/rush/:activityType"
+                element={
+                  <ProtectedRoute>
+                    <RushActivity />
                   </ProtectedRoute>
                 }
               />

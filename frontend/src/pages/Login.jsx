@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import FloatingButton from '../components/FloatingButton'
+import api from '../api/axios'
 
 const Login = () => {
   const { login, token } = useAuth()
@@ -9,6 +10,9 @@ const Login = () => {
   const [buttonPosition, setButtonPosition] = useState({ x: 50, y: 50 })
   const [isMoving, setIsMoving] = useState(true)
   const [showBackground, setShowBackground] = useState(false)
+  const [showEmailLogin, setShowEmailLogin] = useState(false)
+  const [emailCreds, setEmailCreds] = useState({ email: '', password: '', name: '' })
+  const [emailLoading, setEmailLoading] = useState(false)
   const buttonRef = useRef(null)
   const moveIntervalRef = useRef(null)
 
@@ -65,6 +69,33 @@ const Login = () => {
       }
     }
   }, [])
+
+  const handleEmailLogin = async (e) => {
+    e.preventDefault()
+    setEmailLoading(true)
+    try {
+      const response = await api.post('/auth/email', {
+        email: emailCreds.email,
+        password: emailCreds.password,
+        name: emailCreds.name || undefined // Only send name if provided
+      })
+      
+      const { token: jwtToken, user: userData } = response.data
+      
+      // Set token and user in localStorage and update context
+      localStorage.setItem('token', jwtToken)
+      api.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`
+      
+      // Force page reload to update auth context
+      window.location.href = '/dashboard'
+    } catch (error) {
+      console.error('Email login failed:', error)
+      const errorMsg = error.response?.data?.error || error.message || 'Email login failed'
+      alert(`Login failed: ${errorMsg}`)
+    } finally {
+      setEmailLoading(false)
+    }
+  }
 
   const buttonStyle = isMoving
     ? {
@@ -129,10 +160,68 @@ const Login = () => {
             >
               <span className="flex items-center gap-3 whitespace-nowrap">
                 <span className="text-2xl">🚀</span>
-                <span>LOGIN KARLE YA SOJA</span>
+                <span>LOGIN WITH GOOGLE</span>
                 <span className="text-2xl">🌀</span>
               </span>
             </FloatingButton>
+            
+            <button
+              onClick={() => setShowEmailLogin(!showEmailLogin)}
+              className="text-white text-sm underline hover:no-underline mt-2"
+            >
+              {showEmailLogin ? 'Hide' : 'Show'} Email/Password Login
+            </button>
+
+            {showEmailLogin && (
+              <form 
+                onSubmit={handleEmailLogin}
+                className="bg-white bg-opacity-90 rounded-2xl p-6 space-y-4 max-w-md mx-auto shadow-2xl mt-4"
+              >
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Email/Password Login</h3>
+                
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={emailCreds.email}
+                  onChange={(e) => setEmailCreds({...emailCreds, email: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                  required
+                  disabled={emailLoading}
+                />
+                
+                <input
+                  type="password"
+                  placeholder="Password (min 6 characters)"
+                  value={emailCreds.password}
+                  onChange={(e) => setEmailCreds({...emailCreds, password: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                  required
+                  minLength={6}
+                  disabled={emailLoading}
+                />
+                
+                <input
+                  type="text"
+                  placeholder="Name (optional - for new users)"
+                  value={emailCreds.name}
+                  onChange={(e) => setEmailCreds({...emailCreds, name: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                  disabled={emailLoading}
+                />
+                
+                <button
+                  type="submit"
+                  disabled={emailLoading}
+                  className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors disabled:opacity-50"
+                >
+                  {emailLoading ? 'Logging in...' : 'Login / Sign Up'}
+                </button>
+                
+                <p className="text-xs text-gray-600 text-center">
+                  Agar user nahi hai, naya account ban jayega automatically!
+                </p>
+              </form>
+            )}
           </div>
         )}
 
