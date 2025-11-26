@@ -1,0 +1,557 @@
+{
+  "version": "1.0.0",
+  "generated": "2025-11-26T11:26:51.517Z",
+  "totalPrompts": 15,
+  "prompts": [
+    {
+      "id": "chat.conversation",
+      "name": "Chat Bot Conversation",
+      "description": "Generate contextual chat responses for FaltuBot in chat rooms",
+      "category": "uncategorized",
+      "subcategory": "conversation",
+      "filePath": "chat.conversation.prompt.js",
+      "version": 1,
+      "tags": [
+        "chat",
+        "conversation",
+        "bot"
+      ],
+      "requiredVariables": [
+        "roomName",
+        "recentMessages",
+        "messageCount",
+        "activityLevel"
+      ],
+      "defaultParams": {
+        "temperature": 0.85,
+        "maxTokens": 150,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:18.850Z"
+    },
+    {
+      "id": "engagement.idle",
+      "name": "Idle User Engagement",
+      "description": "Generate engaging content to re-engage idle users",
+      "category": "uncategorized",
+      "subcategory": "idle",
+      "filePath": "engagement.idle.prompt.js",
+      "version": 1,
+      "tags": [
+        "engagement",
+        "idle",
+        "popup"
+      ],
+      "requiredVariables": [
+        "idleDuration",
+        "currentPage",
+        "lastActivity"
+      ],
+      "defaultParams": {
+        "temperature": 0.9,
+        "maxTokens": 200,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:14.455Z"
+    },
+    {
+      "id": "engagement.welcome",
+      "name": "Welcome Message Generation",
+      "description": "Generate personalized welcome messages for users logging into FaltuVerse",
+      "category": "uncategorized",
+      "subcategory": "welcome",
+      "filePath": "engagement.welcome.prompt.js",
+      "version": 1,
+      "tags": [
+        "engagement",
+        "login",
+        "welcome"
+      ],
+      "requiredVariables": [
+        "currentTime",
+        "loginStreak",
+        "points",
+        "streak"
+      ],
+      "defaultParams": {
+        "temperature": 0.8,
+        "maxTokens": 150,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:10.355Z"
+    },
+    {
+      "id": "fallbacks.generic",
+      "name": "Generic Fallback",
+      "description": "Fallback responses when AI is unavailable",
+      "category": "uncategorized",
+      "subcategory": "generic",
+      "filePath": "fallbacks.generic.prompt.js",
+      "version": 1,
+      "tags": [
+        "fallbacks",
+        "error-handling"
+      ],
+      "requiredVariables": [
+        "originalRequest",
+        "errorType",
+        "reason"
+      ],
+      "defaultParams": {
+        "temperature": 0.5,
+        "maxTokens": 100,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:36:03.670Z"
+    },
+    {
+      "id": "games.bakchodi",
+      "name": "Bakchodi Challenge",
+      "description": "Generate challenges and score submissions for Bakchodi Challenge game",
+      "category": "uncategorized",
+      "subcategory": "bakchodi",
+      "filePath": "games.bakchodi.prompt.js",
+      "version": 1,
+      "tags": [
+        "games",
+        "challenges",
+        "scoring"
+      ],
+      "requiredVariables": [
+        "mode",
+        "date",
+        "challenge",
+        "submission"
+      ],
+      "defaultParams": {
+        "temperature": 0.9,
+        "maxTokens": 250,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:36.614Z"
+    },
+    {
+      "id": "games.dare",
+      "name": "Dare Generation",
+      "description": "Generate fun and safe dares for users",
+      "category": "uncategorized",
+      "subcategory": "dare",
+      "filePath": "games.dare.prompt.js",
+      "version": 1,
+      "tags": [
+        "games",
+        "dares",
+        "challenges"
+      ],
+      "requiredVariables": [
+        "userActivity"
+      ],
+      "defaultParams": {
+        "temperature": 0.9,
+        "maxTokens": 150,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:52.909Z"
+    },
+    {
+      "id": "games.debate",
+      "name": "Debate Generation",
+      "description": "Generate debate topics and counter-arguments",
+      "category": "uncategorized",
+      "subcategory": "debate",
+      "filePath": "games.debate.prompt.js",
+      "version": 1,
+      "tags": [
+        "games",
+        "debate",
+        "arguments"
+      ],
+      "requiredVariables": [
+        "mode",
+        "topic",
+        "recent_messages",
+        "message_count",
+        "should_end"
+      ],
+      "defaultParams": {
+        "temperature": 0.85,
+        "maxTokens": 300,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T07:32:50.319Z"
+    },
+    {
+      "id": "games.future",
+      "name": "Future Prediction",
+      "description": "Generate funny future predictions for users",
+      "category": "uncategorized",
+      "subcategory": "future",
+      "filePath": "games.future.prompt.js",
+      "version": 1,
+      "tags": [
+        "games",
+        "predictions",
+        "fun"
+      ],
+      "requiredVariables": [
+        "name",
+        "mood",
+        "favSnack"
+      ],
+      "defaultParams": {
+        "temperature": 0.95,
+        "maxTokens": 200,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:49.443Z"
+    },
+    {
+      "id": "games.joke",
+      "name": "Joke Generation",
+      "description": "Generate funny Hinglish jokes for users",
+      "category": "uncategorized",
+      "subcategory": "joke",
+      "filePath": "games.joke.prompt.js",
+      "version": 1,
+      "tags": [
+        "games",
+        "jokes",
+        "entertainment"
+      ],
+      "requiredVariables": [
+        "recentJokes",
+        "preference"
+      ],
+      "defaultParams": {
+        "temperature": 0.9,
+        "maxTokens": 200,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:32.110Z"
+    },
+    {
+      "id": "games.meme",
+      "name": "Meme Caption Scoring",
+      "description": "Score meme captions for humor, creativity, and nonsense",
+      "category": "uncategorized",
+      "subcategory": "meme",
+      "filePath": "games.meme.prompt.js",
+      "version": 1,
+      "tags": [
+        "games",
+        "memes",
+        "scoring"
+      ],
+      "requiredVariables": [
+        "caption",
+        "imageUrl"
+      ],
+      "defaultParams": {
+        "temperature": 0.85,
+        "maxTokens": 200,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:41.089Z"
+    },
+    {
+      "id": "games.roast",
+      "name": "Roast Generation",
+      "description": "Generate funny, light-hearted roasts for users",
+      "category": "uncategorized",
+      "subcategory": "roast",
+      "filePath": "games.roast.prompt.js",
+      "version": 1,
+      "tags": [
+        "games",
+        "roasts",
+        "humor"
+      ],
+      "requiredVariables": [
+        "userActivity"
+      ],
+      "defaultParams": {
+        "temperature": 0.95,
+        "maxTokens": 200,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T07:32:50.319Z"
+    },
+    {
+      "id": "rewards.points",
+      "name": "Reward Points Suggestion",
+      "description": "Suggest appropriate point rewards for user actions",
+      "category": "uncategorized",
+      "subcategory": "points",
+      "filePath": "rewards.points.prompt.js",
+      "version": 1,
+      "tags": [
+        "rewards",
+        "points",
+        "gamification"
+      ],
+      "requiredVariables": [
+        "action",
+        "context",
+        "currentPoints",
+        "loginStreak"
+      ],
+      "defaultParams": {
+        "temperature": 0.7,
+        "maxTokens": 150,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:27.547Z"
+    },
+    {
+      "id": "system.core",
+      "name": "FaltuVerse Core System Prompt (Enhanced)",
+      "description": "Improved core prompt defining FaltuBot's role, tone, behavior, and JSON rules",
+      "category": "uncategorized",
+      "subcategory": "core",
+      "filePath": "system.core.prompt.js",
+      "version": 2,
+      "tags": [
+        "system",
+        "core",
+        "base",
+        "improved"
+      ],
+      "requiredVariables": [],
+      "defaultParams": {
+        "temperature": 0.85,
+        "maxTokens": 350,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T11:10:53.820Z"
+    },
+    {
+      "id": "system.cron",
+      "name": "Cron Event Suggestion",
+      "description": "Suggest if events should happen during cron jobs",
+      "category": "uncategorized",
+      "subcategory": "cron",
+      "filePath": "system.cron.prompt.js",
+      "version": 1,
+      "tags": [
+        "system",
+        "cron",
+        "events"
+      ],
+      "requiredVariables": [
+        "eventType",
+        "currentTime",
+        "userActivity",
+        "recentEvents"
+      ],
+      "defaultParams": {
+        "temperature": 0.7,
+        "maxTokens": 200,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:36:00.156Z"
+    },
+    {
+      "id": "ui.chaos",
+      "name": "Chaos Event Generation",
+      "description": "Generate creative chaos events and visual effects",
+      "category": "uncategorized",
+      "subcategory": "chaos",
+      "filePath": "ui.chaos.prompt.js",
+      "version": 1,
+      "tags": [
+        "ui",
+        "chaos",
+        "events"
+      ],
+      "requiredVariables": [
+        "currentState",
+        "currentTime"
+      ],
+      "defaultParams": {
+        "temperature": 0.95,
+        "maxTokens": 200,
+        "responseFormat": "json_object"
+      },
+      "usageCount": 0,
+      "avgResponseTime": 0,
+      "successRate": 100,
+      "lastUpdated": "2025-11-26T06:35:23.406Z"
+    }
+  ],
+  "categories": {
+    "uncategorized": [
+      "chat.conversation",
+      "engagement.idle",
+      "engagement.welcome",
+      "fallbacks.generic",
+      "games.bakchodi",
+      "games.dare",
+      "games.debate",
+      "games.future",
+      "games.joke",
+      "games.meme",
+      "games.roast",
+      "rewards.points",
+      "system.core",
+      "system.cron",
+      "ui.chaos"
+    ]
+  },
+  "tags": {
+    "chat": [
+      "chat.conversation"
+    ],
+    "conversation": [
+      "chat.conversation"
+    ],
+    "bot": [
+      "chat.conversation"
+    ],
+    "engagement": [
+      "engagement.idle",
+      "engagement.welcome"
+    ],
+    "idle": [
+      "engagement.idle"
+    ],
+    "popup": [
+      "engagement.idle"
+    ],
+    "login": [
+      "engagement.welcome"
+    ],
+    "welcome": [
+      "engagement.welcome"
+    ],
+    "fallbacks": [
+      "fallbacks.generic"
+    ],
+    "error-handling": [
+      "fallbacks.generic"
+    ],
+    "games": [
+      "games.bakchodi",
+      "games.dare",
+      "games.debate",
+      "games.future",
+      "games.joke",
+      "games.meme",
+      "games.roast"
+    ],
+    "challenges": [
+      "games.bakchodi",
+      "games.dare"
+    ],
+    "scoring": [
+      "games.bakchodi",
+      "games.meme"
+    ],
+    "dares": [
+      "games.dare"
+    ],
+    "debate": [
+      "games.debate"
+    ],
+    "arguments": [
+      "games.debate"
+    ],
+    "predictions": [
+      "games.future"
+    ],
+    "fun": [
+      "games.future"
+    ],
+    "jokes": [
+      "games.joke"
+    ],
+    "entertainment": [
+      "games.joke"
+    ],
+    "memes": [
+      "games.meme"
+    ],
+    "roasts": [
+      "games.roast"
+    ],
+    "humor": [
+      "games.roast"
+    ],
+    "rewards": [
+      "rewards.points"
+    ],
+    "points": [
+      "rewards.points"
+    ],
+    "gamification": [
+      "rewards.points"
+    ],
+    "system": [
+      "system.core",
+      "system.cron"
+    ],
+    "core": [
+      "system.core"
+    ],
+    "base": [
+      "system.core"
+    ],
+    "improved": [
+      "system.core"
+    ],
+    "cron": [
+      "system.cron"
+    ],
+    "events": [
+      "system.cron",
+      "ui.chaos"
+    ],
+    "ui": [
+      "ui.chaos"
+    ],
+    "chaos": [
+      "ui.chaos"
+    ]
+  }
+}
