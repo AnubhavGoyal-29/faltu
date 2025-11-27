@@ -206,68 +206,51 @@ const initializeAdminPanel = (app, sequelize) => {
     },
   });
 
-  // Session configuration for AdminJS
-  const sessionConfig = {
-    resave: false,
-    saveUninitialized: false,
-    secret: process.env.ADMINJS_SECRET || 'faltuverse-admin-secret-key-change-in-production',
-    name: 'adminjs',
-    cookie: {
-      httpOnly: true,
-      secure: true, // Always true for HTTPS
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      path: '/', // Root path so cookie works for all admin routes
-    },
-  };
+  // Create router WITHOUT authentication - simple query parameter check
+  const adminRouter = AdminJSExpress.buildRouter(adminJs);
 
-  // Create router with authentication
-  // AdminJS v6: buildAuthenticatedRouter uses rootPath from adminJs instance
-  const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
-    adminJs,
-    {
-      authenticate: async (email, password, req) => {
-        console.log(`🔐 Admin login attempt: email=${email}, password=${password ? '***' : 'missing'}`);
-        // Check admin credentials
-        if (email === 'admin' && password === 'admin123') {
-          console.log('✅ Admin authentication successful');
-          // Force session save after authentication
-          if (req && req.session) {
-            req.session.authenticated = true;
-            req.session.user = { email: 'admin', role: 'admin' };
-            return new Promise((resolve) => {
-              req.session.save((err) => {
-                if (err) {
-                  console.error('❌ Session save error:', err);
-                } else {
-                  console.log('✅ Session saved successfully');
-                }
-                resolve({ email: 'admin', role: 'admin' });
-              });
-            });
-          }
-          return { email: 'admin', role: 'admin' };
-        }
-        console.log(`❌ Admin authentication failed for email: ${email}`);
-        return null;
-      },
-      cookieName: 'adminjs',
-      cookiePassword: process.env.ADMINJS_SECRET || 'faltuverse-admin-secret-key-change-in-production',
-    },
-    null,
-    sessionConfig
-  );
+  // Add middleware to check for name query parameter
+  // Only allow access if name=anubhav is in the URL
+  app.use(adminJs.options.rootPath, (req, res, next) => {
+    // Allow access if name=anubhav is in query params
+    if (req.query.name === 'anubhav') {
+      console.log(`✅ Admin access granted for: ${req.query.name}`);
+      return next();
+    }
+    
+    // Redirect to login page with error if name parameter is missing or wrong
+    if (req.path === '/login' || req.path === '/') {
+      // If accessing login page without correct name, show error
+      if (!req.query.name || req.query.name !== 'anubhav') {
+        return res.status(403).send(`
+          <html>
+            <head><title>Access Denied</title></head>
+            <body style="font-family: Arial; text-align: center; padding: 50px;">
+              <h1>🔒 Access Denied</h1>
+              <p>Please access admin panel with: <code>?name=anubhav</code></p>
+              <p><a href="${adminJs.options.rootPath}?name=anubhav">Click here to access admin panel</a></p>
+            </body>
+          </html>
+        `);
+      }
+    }
+    
+    // For all other routes, check the name parameter
+    if (req.query.name !== 'anubhav') {
+      return res.redirect(`${adminJs.options.rootPath}?name=anubhav`);
+    }
+    
+    next();
+  });
 
-  // Mount admin panel router
-  // IMPORTANT: Mount at rootPath - AdminJS router handles all sub-routes including /login
+  // Mount admin panel router AFTER the middleware
+  // IMPORTANT: Mount at rootPath - AdminJS router handles all sub-routes
   try {
     app.use(adminJs.options.rootPath, adminRouter);
     
     console.log(`🔗 Admin Panel mounted at: ${adminJs.options.rootPath}`);
-    console.log(`🔗 Login URL: http://localhost:${process.env.PORT || 5000}${adminJs.options.rootPath}/login`);
-
-    console.log(`✅ Admin Panel initialized at: http://localhost:${process.env.PORT || 5000}${adminJs.options.rootPath}`);
-    console.log(`🔐 Login with: admin / admin123`);
+    console.log(`✅ Admin Panel initialized (NO AUTH - Query param access only)`);
+    console.log(`🔗 Access URL: https://faltuverse.cloud${adminJs.options.rootPath}?name=anubhav`);
   } catch (error) {
     console.error('❌ Admin Panel initialization error:', error);
     console.error('Error stack:', error.stack);
