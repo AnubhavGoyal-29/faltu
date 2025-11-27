@@ -8,6 +8,7 @@
 const AdminJS = require('adminjs');
 const AdminJSSequelize = require('@adminjs/sequelize');
 const AdminJSExpress = require('@adminjs/express');
+const session = require('express-session');
 
 // Import all models
 const {
