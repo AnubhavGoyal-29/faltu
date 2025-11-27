@@ -97,7 +97,7 @@ const Tambola = () => {
     newSocket.on('tambola_next_number_countdown', (data) => {
       // Update countdown - will match room when room state is set
       // Store in a ref or update directly since room might not be set yet
-      setNextNumberCountdown(data.seconds_remaining)
+        setNextNumberCountdown(data.seconds_remaining)
     })
 
     newSocket.on('tambola_ticket_update', (data) => {
@@ -161,7 +161,7 @@ const Tambola = () => {
         // Set next number countdown if game is active
         if (roomData.status === 'active') {
           if (roomData.seconds_until_next_number !== undefined) {
-            setNextNumberCountdown(roomData.seconds_until_next_number)
+          setNextNumberCountdown(roomData.seconds_until_next_number)
           } else if (roomData.next_number_call_at) {
             // Calculate from next_number_call_at timestamp
             const now = new Date().getTime()
