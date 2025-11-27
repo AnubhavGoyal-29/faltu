@@ -209,7 +209,7 @@ const initializeAdminPanel = (app, sequelize) => {
   // Create router WITHOUT authentication - simple query parameter check
   const adminRouter = AdminJSExpress.buildRouter(adminJs);
 
-  // Add middleware to check for name query parameter
+  // Add middleware to check for name query parameter BEFORE mounting router
   // Only allow access if name=anubhav is in the URL
   app.use(adminJs.options.rootPath, (req, res, next) => {
     // Allow access if name=anubhav is in query params
@@ -218,29 +218,23 @@ const initializeAdminPanel = (app, sequelize) => {
       return next();
     }
     
-    // Redirect to login page with error if name parameter is missing or wrong
-    if (req.path === '/login' || req.path === '/') {
-      // If accessing login page without correct name, show error
-      if (!req.query.name || req.query.name !== 'anubhav') {
-        return res.status(403).send(`
-          <html>
-            <head><title>Access Denied</title></head>
-            <body style="font-family: Arial; text-align: center; padding: 50px;">
-              <h1>🔒 Access Denied</h1>
-              <p>Please access admin panel with: <code>?name=anubhav</code></p>
-              <p><a href="${adminJs.options.rootPath}?name=anubhav">Click here to access admin panel</a></p>
-            </body>
-          </html>
-        `);
-      }
+    // For root path or login, show access denied message
+    if (req.path === '/' || req.path === '/login' || req.path === '') {
+      return res.status(403).send(`
+        <html>
+          <head><title>Access Denied</title></head>
+          <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>🔒 Access Denied</h1>
+            <p>Please access admin panel with: <code>?name=anubhav</code></p>
+            <p><a href="${adminJs.options.rootPath}?name=anubhav">Click here to access admin panel</a></p>
+          </body>
+        </html>
+      `);
     }
     
-    // For all other routes, check the name parameter
-    if (req.query.name !== 'anubhav') {
-      return res.redirect(`${adminJs.options.rootPath}?name=anubhav`);
-    }
-    
-    next();
+    // For all other routes, redirect with name parameter
+    const separator = req.url.includes('?') ? '&' : '?';
+    return res.redirect(`${adminJs.options.rootPath}${req.path}${separator}name=anubhav`);
   });
 
   // Mount admin panel router AFTER the middleware
