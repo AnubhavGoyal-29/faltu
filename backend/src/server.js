@@ -53,13 +53,14 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parser middleware (needed for AdminJS login form)
+// Initialize Admin Panel FIRST (before body-parser)
+// AdminJS requires to be mounted before body-parser middleware
+// AdminJS handles its own body parsing internally
+initializeAdminPanel(app, sequelize);
+
+// Body parser middleware (AFTER AdminJS)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Initialize Admin Panel (after body-parser for login form to work)
-// AdminJS login form needs body-parser to parse form data
-initializeAdminPanel(app, sequelize);
 
 // Routes
 app.use('/api/auth', authRoutes);
