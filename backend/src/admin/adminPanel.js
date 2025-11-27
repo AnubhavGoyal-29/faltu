@@ -206,16 +206,46 @@ const initializeAdminPanel = (app, sequelize) => {
     },
   });
 
+  // Session configuration for AdminJS
+  const sessionConfig = {
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.ADMINJS_SECRET || 'faltuverse-admin-secret-key-change-in-production',
+    name: 'adminjs',
+    cookie: {
+      httpOnly: true,
+      secure: true, // Always true for HTTPS
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/', // Root path so cookie works for all admin routes
+    },
+  };
+
   // Create router with authentication
   // AdminJS v6: buildAuthenticatedRouter uses rootPath from adminJs instance
   const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     adminJs,
     {
-      authenticate: async (email, password) => {
+      authenticate: async (email, password, req) => {
         console.log(`🔐 Admin login attempt: email=${email}, password=${password ? '***' : 'missing'}`);
         // Check admin credentials
         if (email === 'admin' && password === 'admin123') {
           console.log('✅ Admin authentication successful');
+          // Force session save after authentication
+          if (req && req.session) {
+            req.session.authenticated = true;
+            req.session.user = { email: 'admin', role: 'admin' };
+            return new Promise((resolve) => {
+              req.session.save((err) => {
+                if (err) {
+                  console.error('❌ Session save error:', err);
+                } else {
+                  console.log('✅ Session saved successfully');
+                }
+                resolve({ email: 'admin', role: 'admin' });
+              });
+            });
+          }
           return { email: 'admin', role: 'admin' };
         }
         console.log(`❌ Admin authentication failed for email: ${email}`);
@@ -225,20 +255,7 @@ const initializeAdminPanel = (app, sequelize) => {
       cookiePassword: process.env.ADMINJS_SECRET || 'faltuverse-admin-secret-key-change-in-production',
     },
     null,
-    {
-      resave: true,
-      saveUninitialized: true,
-      secret: process.env.ADMINJS_SECRET || 'faltuverse-admin-secret-key-change-in-production',
-      name: 'adminjs',
-      cookie: {
-        httpOnly: true,
-        secure: true, // Always true for HTTPS
-        sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        path: '/', // Root path so cookie works for all admin routes
-        domain: undefined, // Let browser set domain automatically
-      },
-    }
+    sessionConfig
   );
 
   // Mount admin panel router
