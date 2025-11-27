@@ -231,10 +231,11 @@ const initializeAdminPanel = (app, sequelize) => {
       name: 'adminjs',
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // Always true for HTTPS
         sameSite: 'lax',
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         path: '/', // Root path so cookie works for all admin routes
+        domain: undefined, // Let browser set domain automatically
       },
     }
   );
