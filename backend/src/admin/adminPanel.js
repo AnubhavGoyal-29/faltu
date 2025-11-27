@@ -211,13 +211,13 @@ const initializeAdminPanel = (app, sequelize) => {
     adminJs,
     {
       authenticate: async (email, password) => {
-        console.log(`🔐 Admin login attempt: email=${email}`);
+        console.log(`🔐 Admin login attempt: email=${email}, password=${password ? '***' : 'missing'}`);
         // Check admin credentials
         if (email === 'admin' && password === 'admin123') {
           console.log('✅ Admin authentication successful');
           return { email: 'admin', role: 'admin' };
         }
-        console.log('❌ Admin authentication failed');
+        console.log(`❌ Admin authentication failed for email: ${email}`);
         return null;
       },
       cookieName: 'adminjs',
@@ -225,14 +225,14 @@ const initializeAdminPanel = (app, sequelize) => {
     },
     null,
     {
-      resave: false,
-      saveUninitialized: false,
+      resave: true,
+      saveUninitialized: true,
       secret: process.env.ADMINJS_SECRET || 'faltuverse-admin-secret-key-change-in-production',
       name: 'adminjs',
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: 'lax', // Changed from 'none' to 'lax' for better compatibility
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         path: '/admin',
       },
