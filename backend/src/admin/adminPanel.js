@@ -241,6 +241,20 @@ const initializeAdminPanel = (app, sequelize) => {
 
   console.log(`✅ Admin Panel initialized at: http://localhost:${process.env.PORT || 5000}${adminJs.options.rootPath}`);
   console.log(`🔐 Login with: admin / admin123`);
+  
+  // Error handling for admin panel
+  app.use((err, req, res, next) => {
+    if (req.path.startsWith('/admin')) {
+      console.error('❌ Admin Panel Error:', err);
+      res.status(500).send(`
+        <h1>Admin Panel Error</h1>
+        <p>Error: ${err.message}</p>
+        <p>Check server logs for details.</p>
+      `);
+    } else {
+      next(err);
+    }
+  });
 
   return adminJs;
 };
