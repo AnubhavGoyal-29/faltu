@@ -211,10 +211,13 @@ const initializeAdminPanel = (app, sequelize) => {
     adminJs,
     {
       authenticate: async (email, password) => {
+        console.log(`🔐 Admin login attempt: email=${email}`);
         // Check admin credentials
         if (email === 'admin' && password === 'admin123') {
+          console.log('✅ Admin authentication successful');
           return { email: 'admin', role: 'admin' };
         }
+        console.log('❌ Admin authentication failed');
         return null;
       },
       cookieName: 'adminjs',
@@ -223,38 +226,33 @@ const initializeAdminPanel = (app, sequelize) => {
     null,
     {
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
       secret: process.env.ADMINJS_SECRET || 'faltuverse-admin-secret-key-change-in-production',
+      name: 'adminjs',
       cookie: {
-        httpOnly: process.env.NODE_ENV === 'production',
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        path: '/admin',
       },
     }
   );
 
   // Mount admin panel router
   // IMPORTANT: Mount at rootPath - AdminJS router handles all sub-routes including /login
-  app.use(adminJs.options.rootPath, adminRouter);
-  
-  console.log(`🔗 Admin Panel mounted at: ${adminJs.options.rootPath}`);
-  console.log(`🔗 Login URL: http://localhost:${process.env.PORT || 5000}${adminJs.options.rootPath}/login`);
+  try {
+    app.use(adminJs.options.rootPath, adminRouter);
+    
+    console.log(`🔗 Admin Panel mounted at: ${adminJs.options.rootPath}`);
+    console.log(`🔗 Login URL: http://localhost:${process.env.PORT || 5000}${adminJs.options.rootPath}/login`);
 
-  console.log(`✅ Admin Panel initialized at: http://localhost:${process.env.PORT || 5000}${adminJs.options.rootPath}`);
-  console.log(`🔐 Login with: admin / admin123`);
-  
-  // Error handling for admin panel
-  app.use((err, req, res, next) => {
-    if (req.path.startsWith('/admin')) {
-      console.error('❌ Admin Panel Error:', err);
-      res.status(500).send(`
-        <h1>Admin Panel Error</h1>
-        <p>Error: ${err.message}</p>
-        <p>Check server logs for details.</p>
-      `);
-    } else {
-      next(err);
-    }
-  });
+    console.log(`✅ Admin Panel initialized at: http://localhost:${process.env.PORT || 5000}${adminJs.options.rootPath}`);
+    console.log(`🔐 Login with: admin / admin123`);
+  } catch (error) {
+    console.error('❌ Admin Panel initialization error:', error);
+    console.error('Error stack:', error.stack);
+  }
 
   return adminJs;
 };
