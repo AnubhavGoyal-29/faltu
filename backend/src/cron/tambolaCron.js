@@ -359,6 +359,12 @@ const initializeTambolaGame = async (io) => {
   }
 };
 
+// Export function to get next number call time (for API)
+const getNextNumberCallTime = () => {
+  return nextNumberCallTime ? nextNumberCallTime.toISOString() : null;
+};
+
 module.exports = {
-  initializeTambolaGame
+  initializeTambolaGame,
+  getNextNumberCallTime
 };

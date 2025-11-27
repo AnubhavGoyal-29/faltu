@@ -2,6 +2,10 @@
   "name": "faltuverse-backend",
   "version": "1.0.0",
   "description": "FaltuVerse Backend API",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

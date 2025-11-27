@@ -554,8 +554,6 @@ module.exports = {
       correctAnswerBonus: 3,
       perfectScoreBonus: 12,
       speedBonus: 2
-    },
-    
     }
   },
 

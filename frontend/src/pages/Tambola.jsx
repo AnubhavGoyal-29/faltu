@@ -77,9 +77,16 @@ const Tambola = () => {
       console.log('🎲 Number called:', data)
       setCurrentNumber(data.number)
       setCalledNumbers(data.called_numbers || [])
-      // Update next number countdown
+      // Update next number countdown - will be updated by countdown event
+      // But set initial value if provided
       if (data.seconds_until_next !== undefined) {
         setNextNumberCountdown(data.seconds_until_next)
+      } else if (data.next_call_at) {
+        // Calculate from next_call_at
+        const now = new Date().getTime()
+        const nextCall = new Date(data.next_call_at).getTime()
+        const remaining = Math.max(0, Math.floor((nextCall - now) / 1000))
+        setNextNumberCountdown(remaining)
       }
       // Refresh leaderboard after each number
       if (room) {
@@ -88,15 +95,9 @@ const Tambola = () => {
     })
 
     newSocket.on('tambola_next_number_countdown', (data) => {
-      if (data.room_id === room?.room_id) {
-        setNextNumberCountdown(data.seconds_remaining)
-      }
-    })
-
-    newSocket.on('tambola_next_number_countdown', (data) => {
-      if (data.room_id === room?.room_id) {
-        setNextNumberCountdown(data.seconds_remaining)
-      }
+      // Update countdown - will match room when room state is set
+      // Store in a ref or update directly since room might not be set yet
+      setNextNumberCountdown(data.seconds_remaining)
     })
 
     newSocket.on('tambola_ticket_update', (data) => {
@@ -158,8 +159,16 @@ const Tambola = () => {
         }
         
         // Set next number countdown if game is active
-        if (roomData.status === 'active' && roomData.seconds_until_next_number !== undefined) {
-          setNextNumberCountdown(roomData.seconds_until_next_number)
+        if (roomData.status === 'active') {
+          if (roomData.seconds_until_next_number !== undefined) {
+            setNextNumberCountdown(roomData.seconds_until_next_number)
+          } else if (roomData.next_number_call_at) {
+            // Calculate from next_number_call_at timestamp
+            const now = new Date().getTime()
+            const nextCall = new Date(roomData.next_number_call_at).getTime()
+            const remaining = Math.max(0, Math.floor((nextCall - now) / 1000))
+            setNextNumberCountdown(remaining)
+          }
         }
         
         // Check if user is registered
@@ -238,6 +247,26 @@ const Tambola = () => {
       }
     }
   }, [gameStatus, room])
+
+  // Sync countdown when room data changes (for refresh scenarios)
+  useEffect(() => {
+    if (room && gameStatus === 'active' && room.next_number_call_at) {
+      const updateCountdown = () => {
+        const now = new Date().getTime()
+        const nextCall = new Date(room.next_number_call_at).getTime()
+        const remaining = Math.max(0, Math.floor((nextCall - now) / 1000))
+        setNextNumberCountdown(remaining)
+      }
+      
+      // Update immediately
+      updateCountdown()
+      
+      // Update every second until socket takes over
+      const interval = setInterval(updateCountdown, 1000)
+      
+      return () => clearInterval(interval)
+    }
+  }, [room, gameStatus])
 
   // Fetch user's ticket
   const fetchTicket = async (roomId) => {
@@ -438,7 +467,7 @@ const Tambola = () => {
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <p className="text-sm text-gray-600 mb-1">Next Number In</p>
                 <div className="text-4xl font-black text-purple-600">
-                  {nextNumberCountdown}s
+                  {nextNumberCountdown >= 0 ? `${nextNumberCountdown}s` : '0s'}
                 </div>
               </div>
             </div>

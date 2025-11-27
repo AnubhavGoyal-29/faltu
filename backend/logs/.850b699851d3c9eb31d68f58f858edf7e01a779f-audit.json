@@ -9,6 +9,11 @@
             "date": 1764163527761,
             "name": "/Users/crafto/faltu/backend/logs/chaos-2025-11-26.log",
             "hash": "d3d5381aeb57a2976241f95611a112f45e58cbd4b7ca8afc21a78f59b49590a5"
+        },
+        {
+            "date": 1764220773134,
+            "name": "/Users/crafto/faltu/backend/logs/chaos-2025-11-27.log",
+            "hash": "e84576f1b877fef9ad195a7ec431e18b4c1adddabb859ecde90defab75897143"
         }
     ],
     "hashType": "sha256"

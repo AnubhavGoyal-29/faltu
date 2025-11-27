@@ -21,7 +21,7 @@ The platform combines real-time interactions, AI-powered features, multiple game
 ## 🏗️ Architecture & Tech Stack
 
 ### Backend
-- **Runtime**: Node.js (v14+)
+- **Runtime**: Node.js (v20+ required)
 - **Framework**: Express.js
 - **Database**: MySQL with Sequelize ORM
 - **Real-time**: Socket.IO for WebSocket connections
@@ -1133,7 +1133,7 @@ faltu/
 ## 🐛 Known Issues & Limitations
 
 1. **Email/Password Route**: May need server restart after adding new routes
-2. **Node Version**: Requires Node.js v14+ (some packages may need v16+)
+2. **Node Version**: Requires Node.js v20+ (project includes `.nvmrc` and `.node-version` for automatic version management)
 3. **AI Features**: Optional, app works without OpenAI API key
 4. **Mobile**: Some features may need mobile optimization
 5. **Performance**: Large user base may need optimization

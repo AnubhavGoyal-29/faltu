@@ -9,6 +9,11 @@
             "date": 1764163527760,
             "name": "/Users/crafto/faltu/backend/logs/server-2025-11-26.log",
             "hash": "c6ec26b27de42727b950a99173bf8330e937f1f702fdd6c2fb5d20c7331d9082"
+        },
+        {
+            "date": 1764220773132,
+            "name": "/Users/crafto/faltu/backend/logs/server-2025-11-27.log",
+            "hash": "dead3afa35c4f4ed47a0d3173bb7d0ef39bf44bf206d6e99361751fff1001711"
         }
     ],
     "hashType": "sha256"

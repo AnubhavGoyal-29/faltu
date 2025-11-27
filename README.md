@@ -32,9 +32,11 @@ FaltuVerse is a "pure entertainment for no reason" web application where users c
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
-- Node.js (v16 or higher)
+- Node.js (v20 or higher) - **Required: v20.x.x**
 - MySQL (v8.0 or higher)
 - npm or yarn
+
+**Note:** This project requires Node.js 20. The project includes `.nvmrc` and `.node-version` files to automatically use the correct version.
 
 ## 🔧 Setup Instructions
 

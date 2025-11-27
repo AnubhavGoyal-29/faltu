@@ -2,6 +2,10 @@
   "name": "faltuverse",
   "version": "1.0.0",
   "description": "FaltuVerse - Pure Entertainment for No Reason",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "install:backend": "cd backend && npm install",
     "install:frontend": "cd frontend && npm install",

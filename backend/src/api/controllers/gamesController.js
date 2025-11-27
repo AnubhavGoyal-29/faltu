@@ -78,6 +78,7 @@ const {
   completePressureCooker,
   getNonsenseQuiz,
   submitNonsenseQuiz,
+  getJhandMeter,
 } = require('../../services/gamesService');
 const { BakchodiChallenge, Debate, MemeBattle, FuturePrediction, Dare, Roast } = require('../../models');
 
@@ -954,40 +955,51 @@ const submitNonsensePoetryForUser = async (req, res) => {
   }
 };
 
-// 6. Aukaat Check (different from aukaatMeter)
-const getAukaatCheckGameForUser = async (req, res) => {
+// 6. Aukaat Meter
+const getAukaatCheckForUser = async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const result = await getAukaatCheckGame(userId);
-    res.json({ success: true, ...result });
+    // Using getJhandMeter as a placeholder - should be replaced with getAukaatMeter when implemented
+    const result = await getJhandMeter(userId);
+    // Transform result to aukaat format
+    res.json({ 
+      success: true, 
+      meter_id: result.meter_id,
+      aukaat_score: result.jhand_score,
+      aukaat_level: result.jhand_level,
+      message: result.message,
+      points_awarded: result.points_awarded
+    });
   } catch (error) {
-    console.error('🎮 [GAMES] Get aukaat check error:', error);
-    res.status(500).json({ success: false, error: 'Aukaat check fetch nahi hua' });
+    console.error('🎮 [GAMES] Get aukaat meter error:', error);
+    res.status(500).json({ success: false, error: 'Aukaat meter fetch nahi hua' });
   }
 };
 
-// 7. Jhand Challenge
-const getJhandChallengeForUser = async (req, res) => {
+// 6. Aukaat Check (removed - game was deleted)
+const getAukaatCheckGameForUser = async (req, res) => {
+  res.status(404).json({ success: false, error: 'This game has been removed' });
+};
+
+// 7. Jhand Meter
+const getJhandMeterForUser = async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const challenge = await getJhandChallenge(userId);
-    res.json({ success: true, challenge });
+    const result = await getJhandMeter(userId);
+    res.json({ success: true, ...result });
   } catch (error) {
-    console.error('🎮 [GAMES] Get jhand challenge error:', error);
-    res.status(500).json({ success: false, error: 'Challenge fetch nahi hua' });
+    console.error('🎮 [GAMES] Get jhand meter error:', error);
+    res.status(500).json({ success: false, error: 'Jhand meter fetch nahi hua' });
   }
+};
+
+// 7. Jhand Challenge (removed - game was deleted)
+const getJhandChallengeForUser = async (req, res) => {
+  res.status(404).json({ success: false, error: 'This game has been removed' });
 };
 
 const completeJhandChallengeForUser = async (req, res) => {
-  try {
-    const userId = req.user.user_id;
-    const { challenge_id } = req.body;
-    const result = await completeJhandChallenge(userId, challenge_id);
-    res.json({ success: true, ...result });
-  } catch (error) {
-    console.error('🎮 [GAMES] Complete jhand challenge error:', error);
-    res.status(500).json({ success: false, error: 'Challenge complete nahi hui' });
-  }
+  res.status(404).json({ success: false, error: 'This game has been removed' });
 };
 
 // 8. Desi Speed Tap

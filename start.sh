@@ -113,10 +113,24 @@ export GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI
 export FRONTEND_URL OPENAI_API_KEY OPENAI_MODEL
 export VITE_API_URL VITE_GOOGLE_CLIENT_ID
 
-# Check if fnm is available
+# Check if fnm is available and ensure Node 20
 if command -v fnm &> /dev/null; then
     eval "$(fnm env)"
-    fnm use 20 > /dev/null 2>&1 || echo "⚠️  Node 20 not found, using default node"
+    # Install Node 20 if not available
+    if ! fnm list | grep -q "v20"; then
+        echo "📦 Installing Node.js 20..."
+        fnm install 20
+    fi
+    fnm use 20
+    fnm default 20 2>/dev/null || true
+elif command -v nvm &> /dev/null; then
+    # Fallback to nvm if fnm not available
+    source "$HOME/.nvm/nvm.sh" 2>/dev/null || true
+    if [ -f .nvmrc ]; then
+        nvm use
+    else
+        nvm use 20 2>/dev/null || nvm install 20
+    fi
 fi
 
 # Start backend in background
@@ -132,11 +146,23 @@ if command -v fnm &> /dev/null; then
     eval "$(fnm env)"
     fnm use 20
     export PATH="$HOME/.local/share/fnm_multishells/current/bin:$PATH"
+elif command -v nvm &> /dev/null; then
+    source "$HOME/.nvm/nvm.sh" 2>/dev/null || true
+    if [ -f .nvmrc ]; then
+        nvm use
+    else
+        nvm use 20 2>/dev/null || nvm install 20
+    fi
 fi
 
 # Verify Node version
 NODE_VERSION=$(node --version 2>&1)
 echo "Using Node: $NODE_VERSION"
+# Check if Node 20 is being used
+if ! echo "$NODE_VERSION" | grep -q "v20"; then
+    echo "⚠️  WARNING: Not using Node.js 20! Current version: $NODE_VERSION"
+    echo "⚠️  Please install and use Node.js 20 for this project"
+fi
 
 npm start > ../backend.log 2>&1 &
 BACKEND_PID=$!

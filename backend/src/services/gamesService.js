@@ -711,21 +711,6 @@ const submitMemeMaster = async (userId, memeCaption) => {
   }
 };
 
-  const points = resultType === 'nothing' ? 0 : 
-    Math.floor(Math.random() * (config.pointsRange[1] - config.pointsRange[0] + 1)) + config.pointsRange[0];
-  
-  if (points > 0) {
-    const user = await User.findByPk(userId);
-    await addPoints(userId, points, 'lucky_chaos', user);
-  }
-  
-  return {
-    spin_id: Date.now(),
-    result_type: resultType,
-    points_awarded: points
-  };
-};
-
 // Reflex Master - Enhanced reaction test
 const startReflexMaster = async (userId) => {
   return {
@@ -1416,43 +1401,6 @@ const submitMemeGenerator = async (userId, memeText) => {
 };
 
 // 16. Reaction Test - Test reaction time
-const startReactionTest = async (userId) => {
-  const user = await User.findByPk(userId);
-  const outcomes = {
-    jackpot: { weight: 5, pointsRange: [50, 100] },
-    win: { weight: 20, pointsRange: [10, 30] },
-    smallWin: { weight: 40, pointsRange: [1, 9] },
-    nothing: { weight: 35, pointsRange: [0, 0] }
-  };
-  
-  const totalWeight = 100;
-  let random = Math.random() * totalWeight;
-  
-  let outcome = 'nothing';
-  let cumulative = 0;
-  for (const [key, value] of Object.entries(outcomes)) {
-    cumulative += value.weight;
-    if (random <= cumulative) {
-      outcome = key;
-      break;
-    }
-  }
-  
-  const pointsRange = outcomes[outcome].pointsRange;
-  const points = outcome === 'nothing' ? 0 : Math.floor(Math.random() * (pointsRange[1] - pointsRange[0] + 1)) + pointsRange[0];
-  
-  if (points > 0) {
-    await addPoints(userId, points, 'luck_draw', user);
-  }
-  
-  return {
-    draw_id: Date.now(),
-    outcome,
-    points_awarded: points
-  };
-};
-
-// 17. Reaction Test - Test reaction time
 const startReactionTest = async (userId) => {
   return {
     test_id: Date.now(),

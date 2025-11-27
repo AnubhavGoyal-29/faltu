@@ -1,9 +1,11 @@
 # Quick Setup Guide
 
 ## Prerequisites
-- Node.js v16+ installed
+- Node.js v20+ installed (**Required: v20.x.x**)
 - MySQL v8.0+ installed and running
 - Google Cloud Console account (for OAuth)
+
+**Note:** This project requires Node.js 20. If you use `nvm` or `fnm`, the project will automatically use Node 20 via `.nvmrc` or `.node-version` files.
 
 ## Step-by-Step Setup
 

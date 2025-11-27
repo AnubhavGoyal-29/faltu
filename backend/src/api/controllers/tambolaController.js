@@ -42,12 +42,23 @@ const getOrCreateRoom = async (req, res) => {
     let secondsUntilNext = 0;
     
     if (room.status === 'active') {
-      // Get next call time from cron (if available)
-      // For now, we'll calculate based on last call time
-      // In production, this should come from cron state
-      // For API response, we'll return a placeholder that will be updated via socket
-      nextNumberCallTime = null; // Will be updated via socket
-      secondsUntilNext = 0; // Will be updated via socket
+      // Get next call time from cron module
+      const tambolaCron = require('../../cron/tambolaCron');
+      const cronNextCallTime = tambolaCron.getNextNumberCallTime();
+      
+      if (cronNextCallTime) {
+        const now = new Date();
+        const nextCall = new Date(cronNextCallTime);
+        secondsUntilNext = Math.max(0, Math.floor((nextCall - now) / 1000));
+        nextNumberCallTime = cronNextCallTime;
+      } else {
+        // Fallback: calculate from last number call (5 seconds interval)
+        // If we have a current_number, assume next call is in 5 seconds
+        if (room.current_number) {
+          secondsUntilNext = 5;
+          nextNumberCallTime = new Date(Date.now() + 5000).toISOString();
+        }
+      }
     }
     
     res.json({
