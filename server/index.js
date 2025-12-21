@@ -63,6 +63,18 @@ app.post('/api/event', (req, res) => {
     });
 });
 
+// Serve Frontend Static Files
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// SPA Fallback (Must be last)
+app.get('*', (req, res) => {
+    // Skip API routes to avoid confusion if API 404s
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: 'Not Found' });
+    }
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

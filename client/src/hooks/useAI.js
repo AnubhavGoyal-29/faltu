@@ -16,7 +16,7 @@ export const useAI = () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch('http://localhost:3000/api/ai/generate', {
+            const res = await fetch('/api/ai/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type, context }),

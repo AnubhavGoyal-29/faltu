@@ -5,8 +5,8 @@ const TrackingContext = createContext();
 
 export const useTracking = () => useContext(TrackingContext);
 
-// API URL - defaulting to localhost for MVP
-const API_URL = 'http://localhost:3000/api/event';
+// API URL - relative path for production (proxied by backend/nginx)
+const API_URL = '/api/event';
 
 export const TrackingProvider = ({ children }) => {
     const [userId, setUserId] = useState(null);
