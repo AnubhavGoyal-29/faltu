@@ -2,6 +2,7 @@ import React from 'react';
 import { TrackingProvider } from './context/TrackingContext';
 import Feed from './components/Feed';
 import ExitModal from './components/ExitModal';
+import './activities/activityStyles.css';
 
 function App() {
     return (

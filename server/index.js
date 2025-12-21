@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const mysql = require('mysql2');
 const path = require('path');
 
 const app = express();
@@ -15,27 +15,41 @@ app.use(express.json());
 const aiRoutes = require('./routes/ai');
 app.use('/api/ai', aiRoutes);
 
-// Database Setup
-const dbPath = path.resolve(__dirname, 'faltu.db');
-const db = new sqlite3.Database(dbPath, (err) => {
+// Database Setup (MySQL)
+const db = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'faltuverse',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Test Connection and Init DB
+db.getConnection((err, connection) => {
     if (err) {
-        console.error('Error opening database', err.message);
+        console.error('Error connecting to MySQL:', err);
     } else {
-        console.log('Connected to the SQLite database.');
-        initDb();
+        console.log('Connected to MySQL database.');
+        initDb(connection);
+        connection.release();
     }
 });
 
-function initDb() {
-    db.run(`CREATE TABLE IF NOT EXISTS events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    anonymous_user_id TEXT NOT NULL,
-    event_name TEXT NOT NULL,
-    activity_id TEXT,
-    timestamp INTEGER,
-    metadata TEXT
-  )`, (err) => {
-        if (err) console.error('Error creating table', err);
+function initDb(connection) {
+    const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS events (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        anonymous_user_id VARCHAR(255) NOT NULL,
+        event_name VARCHAR(255) NOT NULL,
+        activity_id VARCHAR(255),
+        timestamp BIGINT,
+        metadata TEXT
+    )`;
+    connection.query(createTableQuery, (err) => {
+        if (err) console.error('Error creating table:', err);
+        else console.log('Events table ready.');
     });
 }
 
@@ -54,12 +68,12 @@ app.post('/api/event', (req, res) => {
     const sql = `INSERT INTO events (anonymous_user_id, event_name, activity_id, timestamp, metadata) VALUES (?, ?, ?, ?, ?)`;
     const metadataStr = metadata ? JSON.stringify(metadata) : null;
 
-    db.run(sql, [anonymous_user_id, event_name, activity_id, timestamp || Date.now(), metadataStr], function (err) {
+    db.query(sql, [anonymous_user_id, event_name, activity_id, timestamp || Date.now(), metadataStr], (err, result) => {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ error: 'Database error' });
         }
-        res.json({ id: this.lastID, status: 'recorded' });
+        res.json({ id: result.insertId, status: 'recorded' });
     });
 });
 

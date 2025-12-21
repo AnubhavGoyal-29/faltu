@@ -72,25 +72,11 @@ const Feed = () => {
 
     return (
         <div className="feed-container full-screen overflow-hidden bg-black text-white relative">
-            <AnimatePresence initial={false} custom={direction} mode='wait'>
-                <motion.div
-                    key={currentActivity.key}
-                    custom={direction}
-                    variants={variants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    drag="y"
-                    dragConstraints={{ top: 0, bottom: 0 }}
-                    dragElastic={0.2}
-                    onDragEnd={(e, { offset }) => handleSwipe(offset)}
-                    className="absolute inset-0 w-full h-full"
-                >
-                    <PageWrapper onSwipe={handleSwipe}>
-                        <ActivityComponent onComplete={handleComplete} />
-                    </PageWrapper>
-                </motion.div>
-            </AnimatePresence>
+            <div className="absolute inset-0 w-full h-full">
+                <PageWrapper onSwipe={handleSwipe}>
+                    <ActivityComponent onComplete={handleComplete} />
+                </PageWrapper>
+            </div>
 
             {/* Navigation Hints */}
             <div className="pointer-events-none fixed bottom-10 w-full text-center text-white/30 text-xs">
