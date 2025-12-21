@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --accent: #FF3B30;
+    --accent-glow: rgba(255, 59, 48, 0.4);
+    --success: #34C759;
+    --error: #FF453A;
+    --font-main: 'Inter', system-ui, sans-serif;
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+@layer base {
+    body {
+        @apply bg-[var(--bg-primary)] text-white overflow-hidden overscroll-none h-[100dvh] w-screen;
+        font-family: var(--font-main);
+    }
+}
+
+@layer components {
+    .flex-center {
+        @apply flex justify-center items-center;
+    }
+
+    .full-screen {
+        @apply absolute top-0 left-0 w-full h-full;
+    }
+
+    .activity-container {
+        @apply w-full h-full flex flex-col justify-center items-center p-8 text-center relative bg-[var(--bg-secondary)];
+    }
+
+    .btn {
+        @apply px-8 py-4 text-xl font-bold rounded-2xl border transition-transform active:scale-95;
+        background: var(--glass-bg);
+        border-color: var(--glass-border);
+        color: white;
+    }
+}
