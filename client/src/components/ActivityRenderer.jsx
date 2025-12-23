@@ -1,7 +1,7 @@
 import React from 'react';
 import { ACTIVITY_COMPONENTS } from '../activities/registry.js';
 
-function ActivityRenderer({ activity, onComplete, onSkip, onReplay }) {
+function ActivityRenderer({ activity, onComplete, onSkip, onReplay, replayKey }) {
   const ActivityComponent = ACTIVITY_COMPONENTS[activity.type];
   
   if (!ActivityComponent) {
@@ -15,6 +15,7 @@ function ActivityRenderer({ activity, onComplete, onSkip, onReplay }) {
   return (
     <div className="h-full w-full relative">
       <ActivityComponent
+        key={replayKey}
         activity={activity}
         onComplete={onComplete}
         onSkip={onSkip}

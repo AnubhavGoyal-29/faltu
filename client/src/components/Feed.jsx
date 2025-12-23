@@ -15,6 +15,7 @@ function Feed() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isAllCompleted, setIsAllCompleted] = useState(false);
+  const [replayKey, setReplayKey] = useState(0);
 
   // Load next activity from backend
   const loadNextActivity = useCallback(async () => {
@@ -120,8 +121,8 @@ function Feed() {
   const handleReplay = useCallback(() => {
     if (!currentActivity) return;
     
-    // Force re-render by updating key
-    setCurrentActivity({ ...currentActivity });
+    // Force re-render by incrementing replay key
+    setReplayKey(prev => prev + 1);
     
     // Track replay
     trackEvent('activity_replay', currentActivity.id);
@@ -244,7 +245,7 @@ function Feed() {
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={currentActivity.id}
+            key={`${currentActivity.id}-${replayKey}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -252,10 +253,12 @@ function Feed() {
             className="h-full w-full"
           >
             <ActivityRenderer
+              key={`${currentActivity.id}-${replayKey}`}
               activity={currentActivity}
               onComplete={handleComplete}
               onSkip={handleSkip}
               onReplay={handleReplay}
+              replayKey={replayKey}
             />
           </motion.div>
         </AnimatePresence>
