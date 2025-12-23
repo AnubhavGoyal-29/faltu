@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ActivityRenderer from './ActivityRenderer.jsx';
 import HomePage from './HomePage.jsx';
 import CompletionScreen from './CompletionScreen.jsx';
-import { trackEvent, getAnonymousUserId } from '../utils/analytics.js';
+import { trackEvent } from '../utils/analytics.js';
 import { trackActivity, getDoneActivityIds } from '../utils/activityTracking.js';
 import { ACTIVITY_REGISTRY } from '../activities/registry.js';
 

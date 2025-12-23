@@ -1,4 +1,4 @@
-import { getAnonymousUserId } from './analytics.js';
+import { getAnonymousUserId } from './userId.js';
 
 const API_BASE = '/api/activities';
 
