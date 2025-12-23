@@ -102,10 +102,19 @@ function Feed() {
     loadNextActivity();
   }, [currentActivity, loadNextActivity]);
 
-  // Handle next activity (swipe up)
-  const handleNext = useCallback(() => {
+  // Handle next activity (swipe up) - mark as completed
+  const handleNext = useCallback(async () => {
+    if (!currentActivity) return;
+    
+    // Track activity as completed when user scrolls/swipes up
+    await trackActivity(currentActivity.id, 'completed');
+    
+    // Track analytics
+    trackEvent('activity_complete', currentActivity.id);
+    
+    // Load next activity
     loadNextActivity();
-  }, [loadNextActivity]);
+  }, [currentActivity, loadNextActivity]);
 
   // Handle replay - restart current activity (don't mark as done)
   const handleReplay = useCallback(() => {
