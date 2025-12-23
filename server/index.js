@@ -39,7 +39,16 @@ app.use('/api/ai', aiRoutes);
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   const clientDist = join(__dirname, '../client/dist');
-  app.use(express.static(clientDist));
+  
+  // Serve static files with proper headers
+  app.use(express.static(clientDist, {
+    setHeaders: (res, path) => {
+      // Remove restrictive CSP for static assets
+      if (path.endsWith('.html')) {
+        res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://faltuverse.cloud http://localhost:3000;");
+      }
+    }
+  }));
   
   // SPA fallback
   app.get('*', (req, res) => {
