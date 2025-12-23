@@ -20,7 +20,7 @@ export DB_HOST=localhost
 export DB_PORT=3306
 export DB_NAME=faltuverse
 export DB_USER=root
-export DB_PASSWORD='ai-247@Solutions'
+export DB_PASSWORD=''
 
 # JWT Configuration
 export JWT_SECRET=faltuverse_super_secret_jwt_key_2024_abcdefghijklmnopqrstuvwxyz
