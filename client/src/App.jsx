@@ -1,21 +1,27 @@
 import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Feed from './components/Feed.jsx';
+import AdminDashboard from './components/AdminDashboard.jsx';
 import { trackEvent } from './utils/analytics.js';
 
 function App() {
   useEffect(() => {
-    // Track session start
-    trackEvent('session_start');
+    // Track session start (only for main feed, not admin)
+    if (!window.location.pathname.includes('/admin')) {
+      trackEvent('session_start');
+    }
     
     // Track session end on page unload (best effort)
     const handleBeforeUnload = () => {
-      trackEvent('session_end', null, { 
-        method: 'beforeunload' 
-      });
+      if (!window.location.pathname.includes('/admin')) {
+        trackEvent('session_end', null, { 
+          method: 'beforeunload' 
+        });
+      }
     };
     
     const handleVisibilityChange = () => {
-      if (document.hidden) {
+      if (document.hidden && !window.location.pathname.includes('/admin')) {
         trackEvent('session_end', null, { 
           method: 'visibilitychange' 
         });
@@ -32,9 +38,14 @@ function App() {
   }, []);
 
   return (
-    <div className="h-full w-full bg-black text-white">
-      <Feed />
-    </div>
+    <Router>
+      <div className="h-full w-full bg-black text-white">
+        <Routes>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/" element={<Feed />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

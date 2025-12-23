@@ -45,8 +45,24 @@ async function createTables() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `;
 
+  const createUserActivitiesTable = `
+    CREATE TABLE IF NOT EXISTS user_activities (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      anonymous_user_id VARCHAR(255) NOT NULL,
+      activity_id VARCHAR(100) NOT NULL,
+      status ENUM('completed', 'skipped') NOT NULL,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_user_activity (anonymous_user_id, activity_id),
+      INDEX idx_user_id (anonymous_user_id),
+      INDEX idx_activity_id (activity_id),
+      INDEX idx_status (status),
+      INDEX idx_timestamp (timestamp)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `;
+
   try {
     await pool.query(createEventsTable);
+    await pool.query(createUserActivitiesTable);
     console.log('✅ Database tables created');
   } catch (error) {
     console.error('❌ Table creation error:', error.message);
