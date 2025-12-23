@@ -1,9 +1,9 @@
 import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Feed from './components/Feed.jsx';
 import { trackEvent } from './utils/analytics.js';
 
-// Lazy load AdminDashboard to avoid circular dependencies
+// Lazy load all major components to avoid circular dependencies
+const Feed = lazy(() => import('./components/Feed.jsx'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard.jsx'));
 
 function App() {
