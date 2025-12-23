@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ActivityRenderer from './ActivityRenderer.jsx';
 import HomePage from './HomePage.jsx';
 import CompletionScreen from './CompletionScreen.jsx';
-import { trackEvent } from '../utils/analytics.js';
+import { trackEvent, getAnonymousUserId } from '../utils/analytics.js';
 import { trackActivity, getDoneActivityIds } from '../utils/activityTracking.js';
-import { getAnonymousUserId } from '../utils/analytics.js';
 import { ACTIVITY_REGISTRY } from '../activities/registry.js';
 
 const STORAGE_KEY_HAS_STARTED = 'faltuverse_has_started';
@@ -18,22 +17,8 @@ function Feed() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
 
-  // Check if user is new or existing
-  useEffect(() => {
-    const hasStarted = localStorage.getItem(STORAGE_KEY_HAS_STARTED);
-    
-    if (!hasStarted) {
-      // New user - show homepage
-      setShowHomePage(true);
-      setIsLoading(false);
-    } else {
-      // Existing user - load their progress
-      loadUserProgress();
-    }
-  }, []);
-
   // Load user's completed/skipped activities
-  const loadUserProgress = async () => {
+  const loadUserProgress = useCallback(async () => {
     try {
       const doneIds = await getDoneActivityIds();
       setDoneActivityIds(new Set(doneIds));
@@ -65,7 +50,21 @@ function Feed() {
       setActivities(shuffled);
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Check if user is new or existing
+  useEffect(() => {
+    const hasStarted = localStorage.getItem(STORAGE_KEY_HAS_STARTED);
+    
+    if (!hasStarted) {
+      // New user - show homepage
+      setShowHomePage(true);
+      setIsLoading(false);
+    } else {
+      // Existing user - load their progress
+      loadUserProgress();
+    }
+  }, [loadUserProgress]);
 
   // Handle Enter button from homepage
   const handleEnter = () => {
