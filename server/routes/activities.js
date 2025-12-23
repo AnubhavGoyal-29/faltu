@@ -1,5 +1,6 @@
 import express from 'express';
 import { getDb } from '../db/mysql.js';
+import { ACTIVITY_REGISTRY, TOTAL_ACTIVITIES } from '../data/activities.js';
 
 const router = express.Router();
 
@@ -41,6 +42,76 @@ router.post('/track', async (req, res) => {
     console.error('Activity tracking error:', error);
     res.status(500).json({ 
       error: 'Failed to track activity' 
+    });
+  }
+});
+
+// GET /api/activities/next - Get next activity for user (backend-controlled)
+router.get('/next', async (req, res) => {
+  try {
+    const { anonymous_user_id } = req.query;
+
+    if (!anonymous_user_id) {
+      return res.status(400).json({ 
+        error: 'anonymous_user_id is required' 
+      });
+    }
+
+    const db = getDb();
+    
+    // Get all activities user has done (completed or skipped)
+    const [doneActivities] = await db.query(
+      `SELECT activity_id FROM user_activities 
+       WHERE anonymous_user_id = ?`,
+      [anonymous_user_id]
+    );
+
+    const doneActivityIds = new Set(doneActivities.map(a => a.activity_id));
+    
+    // Filter out done activities
+    const availableActivities = ACTIVITY_REGISTRY.filter(
+      activity => !doneActivityIds.has(activity.id)
+    );
+
+    // Get completed count separately
+    const [completedActivities] = await db.query(
+      `SELECT COUNT(*) as count FROM user_activities 
+       WHERE anonymous_user_id = ? AND status = 'completed'`,
+      [anonymous_user_id]
+    );
+    
+    const completedCount = completedActivities[0]?.count || 0;
+
+    // Check if all activities are done
+    if (availableActivities.length === 0) {
+      return res.json({
+        completed: true,
+        activity: null,
+        progress: {
+          completed: completedCount,
+          total: TOTAL_ACTIVITIES,
+          remaining: 0
+        }
+      });
+    }
+
+    // Pick a random activity from available ones
+    const randomIndex = Math.floor(Math.random() * availableActivities.length);
+    const nextActivity = availableActivities[randomIndex];
+
+    res.json({
+      completed: false,
+      activity: nextActivity,
+      progress: {
+        completed: completedCount,
+        total: TOTAL_ACTIVITIES,
+        remaining: availableActivities.length
+      }
+    });
+  } catch (error) {
+    console.error('Get next activity error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get next activity' 
     });
   }
 });

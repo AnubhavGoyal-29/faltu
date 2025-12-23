@@ -4,50 +4,49 @@ import ActivityRenderer from './ActivityRenderer.jsx';
 import HomePage from './HomePage.jsx';
 import CompletionScreen from './CompletionScreen.jsx';
 import { trackEvent } from '../utils/analytics.js';
-import { trackActivity, getDoneActivityIds } from '../utils/activityTracking.js';
-import { ACTIVITY_REGISTRY } from '../activities/registry.js';
+import { getNextActivity, trackActivity } from '../utils/activityApi.js';
 
 const STORAGE_KEY_HAS_STARTED = 'faltuverse_has_started';
 
 function Feed() {
   const [showHomePage, setShowHomePage] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [activities, setActivities] = useState([]);
-  const [doneActivityIds, setDoneActivityIds] = useState(new Set());
+  const [currentActivity, setCurrentActivity] = useState(null);
+  const [progress, setProgress] = useState({ completed: 0, total: 20, remaining: 20 });
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [isAllCompleted, setIsAllCompleted] = useState(false);
 
-  // Load user's completed/skipped activities
-  const loadUserProgress = useCallback(async () => {
+  // Load next activity from backend
+  const loadNextActivity = useCallback(async () => {
     try {
-      const doneIds = await getDoneActivityIds();
-      setDoneActivityIds(new Set(doneIds));
+      setIsLoading(true);
+      const response = await getNextActivity();
       
-      // Filter out done activities
-      const availableActivities = ACTIVITY_REGISTRY.filter(
-        activity => !doneIds.includes(activity.id)
-      );
-      
-      if (availableActivities.length === 0) {
+      if (!response) {
+        console.error('Failed to get next activity');
+        setIsLoading(false);
+        return;
+      }
+
+      if (response.completed) {
         // All activities done
-        setActivities([]);
+        setIsAllCompleted(true);
+        setCurrentActivity(null);
+        setProgress(response.progress);
       } else {
-        // Shuffle and set available activities
-        const shuffled = [...availableActivities].sort(() => Math.random() - 0.5);
-        setActivities(shuffled);
+        // Set next activity
+        setCurrentActivity(response.activity);
+        setProgress(response.progress);
         
-        // Track first activity view
-        if (shuffled.length > 0) {
-          trackEvent('activity_view', shuffled[0].id);
+        // Track activity view
+        if (response.activity) {
+          trackEvent('activity_view', response.activity.id);
         }
       }
       
       setIsLoading(false);
     } catch (error) {
-      console.error('Error loading user progress:', error);
-      // Fallback: show all activities
-      const shuffled = [...ACTIVITY_REGISTRY].sort(() => Math.random() - 0.5);
-      setActivities(shuffled);
+      console.error('Error loading next activity:', error);
       setIsLoading(false);
     }
   }, []);
@@ -61,16 +60,16 @@ function Feed() {
       setShowHomePage(true);
       setIsLoading(false);
     } else {
-      // Existing user - load their progress
-      loadUserProgress();
+      // Existing user - load next activity from backend
+      loadNextActivity();
     }
-  }, [loadUserProgress]);
+  }, [loadNextActivity]);
 
   // Handle Enter button from homepage
   const handleEnter = () => {
     localStorage.setItem(STORAGE_KEY_HAS_STARTED, 'true');
     setShowHomePage(false);
-    loadUserProgress();
+    loadNextActivity();
   };
 
   // Handle activity completion
@@ -84,16 +83,13 @@ function Feed() {
     
     // Track activity completion in database
     await trackActivity(currentActivity.id, 'completed');
-    
-    // Add to done set
-    setDoneActivityIds(prev => new Set([...prev, currentActivity.id]));
 
     // Auto-advance after short delay
     setTimeout(() => {
-      handleNext();
+      loadNextActivity();
       setIsCompleting(false);
     }, 500);
-  }, [currentActivity, isCompleting]);
+  }, [currentActivity, isCompleting, loadNextActivity]);
 
   // Handle skip (swipe left)
   const handleSkip = useCallback(async () => {
@@ -102,55 +98,43 @@ function Feed() {
     // Track activity skip in database
     await trackActivity(currentActivity.id, 'skipped');
     
-    // Add to done set
-    setDoneActivityIds(prev => new Set([...prev, currentActivity.id]));
-    
-    handleNext();
-  }, [currentActivity]);
+    // Load next activity
+    loadNextActivity();
+  }, [currentActivity, loadNextActivity]);
 
-  // Handle next activity
+  // Handle next activity (swipe up)
   const handleNext = useCallback(() => {
-    if (currentIndex < activities.length - 1) {
-      const nextIndex = currentIndex + 1;
-      setCurrentIndex(nextIndex);
-      
-      // Track next activity view
-      if (activities[nextIndex]) {
-        trackEvent('activity_view', activities[nextIndex].id);
-      }
-    } else {
-      // No more activities - show completion screen
-      setActivities([]);
-    }
-  }, [currentIndex, activities]);
+    loadNextActivity();
+  }, [loadNextActivity]);
 
-  // Handle replay - restart current activity
+  // Handle replay - restart current activity (don't mark as done)
   const handleReplay = useCallback(() => {
     if (!currentActivity) return;
     
-    // Force re-render by changing key
-    setCurrentIndex(currentIndex);
+    // Force re-render by updating key
+    setCurrentActivity({ ...currentActivity });
     
     // Track replay
     trackEvent('activity_replay', currentActivity.id);
-  }, [currentActivity, currentIndex]);
+  }, [currentActivity]);
 
   // Handle restart from completion screen
-  const handleRestart = () => {
-    // Clear done activities
-    setDoneActivityIds(new Set());
+  const handleRestart = async () => {
+    // Clear localStorage
     localStorage.removeItem(STORAGE_KEY_HAS_STARTED);
+    
+    // Reset state
+    setIsAllCompleted(false);
+    setCurrentActivity(null);
+    setProgress({ completed: 0, total: 20, remaining: 20 });
     
     // Reset to homepage
     setShowHomePage(true);
-    setCurrentIndex(0);
-    setActivities([]);
   };
 
   // Handle exit
   const handleExit = () => {
     trackEvent('session_end', null, { method: 'user_exit' });
-    // Could navigate away or show exit message
   };
 
   // Swipe handlers
@@ -194,11 +178,6 @@ function Feed() {
     }
   };
 
-  const currentActivity = activities[currentIndex];
-  const completedCount = doneActivityIds.size;
-  const totalActivities = ACTIVITY_REGISTRY.length;
-  const remainingCount = totalActivities - completedCount;
-
   // Show loading
   if (isLoading) {
     return (
@@ -214,7 +193,7 @@ function Feed() {
   }
 
   // Show completion screen if all activities done
-  if (activities.length === 0 && completedCount >= totalActivities) {
+  if (isAllCompleted) {
     return (
       <CompletionScreen
         onRestart={handleRestart}
@@ -238,11 +217,11 @@ function Feed() {
       <div className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-sm px-4 py-2">
         <div className="max-w-md mx-auto flex items-center justify-between text-white text-sm">
           <span className="font-semibold">
-            {completedCount} / {totalActivities} Activities
+            {progress.completed} / {progress.total} Activities
           </span>
-          {remainingCount > 0 && (
+          {progress.remaining > 0 && (
             <span className="text-white/60">
-              {remainingCount} remaining
+              {progress.remaining} remaining
             </span>
           )}
         </div>
