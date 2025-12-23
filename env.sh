@@ -12,7 +12,7 @@
 # ============================================
 
 # Server Configuration
-export PORT=5000
+export PORT=3000
 export NODE_ENV=development
 
 # Database Configuration (MySQL)
@@ -20,7 +20,7 @@ export DB_HOST=localhost
 export DB_PORT=3306
 export DB_NAME=faltuverse
 export DB_USER=root
-export DB_PASSWORD=
+export DB_PASSWORD='ai-247@Solutions'
 
 # JWT Configuration
 export JWT_SECRET=faltuverse_super_secret_jwt_key_2024_abcdefghijklmnopqrstuvwxyz
@@ -32,7 +32,7 @@ export GOOGLE_CLIENT_SECRET=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
 export GOOGLE_REDIRECT_URI=http://localhost:5000/api/auth/google/callback
 
 # Frontend URL (for CORS)
-export FRONTEND_URL=http://localhost:5173
+export FRONTEND_URL=https://faltuverse.cloud
 
 # OpenAI Configuration (Optional - AI features work without it)
 export OPENAI_API_KEY="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"
@@ -42,9 +42,8 @@ export OPENAI_MODEL=gpt-3.5-turbo
 # FRONTEND CONFIGURATION
 # ============================================
 
-export VITE_API_URL=http://localhost:5000
-export VITE_GOOGLE_CLIENT_ID=182449420217-nus093tc0cuod8mm56i6qtj89ceuvf6f.apps.googleusercontent.com
-export FRONTEND_URL=http://localhost:3000
+export VITE_API_URL=https://faltuverse.cloud
+export FRONTEND_URL=https://faltuverse.cloud
 
 # ============================================
 # Helper Functions
@@ -54,29 +53,28 @@ export FRONTEND_URL=http://localhost:3000
 generate_env_files() {
     echo "Generating .env files..."
     
-    # Backend .env
-    cat > backend/.env << EOF
-PORT=$PORT
-NODE_ENV=$NODE_ENV
-DB_HOST=$DB_HOST
-DB_PORT=$DB_PORT
-DB_NAME=$DB_NAME
-DB_USER=$DB_USER
-DB_PASSWORD=$DB_PASSWORD
-JWT_SECRET=$JWT_SECRET
-JWT_EXPIRES_IN=$JWT_EXPIRES_IN
-GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
-GOOGLE_REDIRECT_URI=$GOOGLE_REDIRECT_URI
-FRONTEND_URL=$FRONTEND_URL
-OPENAI_API_KEY=$OPENAI_API_KEY
-OPENAI_MODEL=$OPENAI_MODEL
+cat > server/.env << EOF
+PORT=\$PORT
+NODE_ENV=\$NODE_ENV
+DB_HOST=\$DB_HOST
+DB_PORT=\$DB_PORT
+DB_NAME=\$DB_NAME
+DB_USER=\$DB_USER
+DB_PASSWORD='\$DB_PASSWORD'
+JWT_SECRET=\$JWT_SECRET
+JWT_EXPIRES_IN=\$JWT_EXPIRES_IN
+GOOGLE_CLIENT_ID=\$GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET=\$GOOGLE_CLIENT_SECRET
+GOOGLE_REDIRECT_URI=\$GOOGLE_REDIRECT_URI
+FRONTEND_URL=\$FRONTEND_URL
+OPENAI_API_KEY=\$OPENAI_API_KEY
+OPENAI_MODEL=\$OPENAI_MODEL
 EOF
 
     # Frontend .env
-    cat > frontend/.env << EOF
-VITE_API_URL=$VITE_API_URL
-VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+    cat > client/.env << EOF
+VITE_API_URL=\$VITE_API_URL
+VITE_GOOGLE_CLIENT_ID=\$VITE_GOOGLE_CLIENT_ID
 EOF
 
     echo "✅ .env files generated successfully!"
