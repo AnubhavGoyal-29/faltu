@@ -18,11 +18,15 @@ function Feed() {
   const [isAllCompleted, setIsAllCompleted] = useState(false);
   const [showExitScreen, setShowExitScreen] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
+  const [activityCompleted, setActivityCompleted] = useState(false);
 
   // Load next activity from backend
   const loadNextActivity = useCallback(async () => {
     try {
       setIsLoading(true);
+      // Reset completion state when loading new activity
+      setActivityCompleted(false);
+      
       const response = await getNextActivity();
       
       if (!response) {
@@ -75,9 +79,9 @@ function Feed() {
     loadNextActivity();
   };
 
-  // Handle activity completion
+  // Handle activity completion - just mark as completed, don't auto-advance
   const handleComplete = useCallback(async () => {
-    if (isCompleting || !currentActivity) return;
+    if (isCompleting || !currentActivity || activityCompleted) return;
     
     setIsCompleting(true);
     
@@ -87,12 +91,10 @@ function Feed() {
     // Track activity completion in database
     await trackActivity(currentActivity.id, 'completed');
 
-    // Auto-advance after short delay
-    setTimeout(() => {
-      loadNextActivity();
-      setIsCompleting(false);
-    }, 500);
-  }, [currentActivity, isCompleting, loadNextActivity]);
+    // Mark activity as completed - show Next button
+    setActivityCompleted(true);
+    setIsCompleting(false);
+  }, [currentActivity, isCompleting, activityCompleted]);
 
   // Handle skip (swipe left)
   const handleSkip = useCallback(async () => {
@@ -105,23 +107,30 @@ function Feed() {
     loadNextActivity();
   }, [currentActivity, loadNextActivity]);
 
-  // Handle next activity (swipe up) - mark as completed
+  // Handle next activity (swipe up or Next button click)
   const handleNext = useCallback(async () => {
     if (!currentActivity) return;
     
-    // Track activity as completed when user scrolls/swipes up
-    await trackActivity(currentActivity.id, 'completed');
+    // If not already completed, mark as completed
+    if (!activityCompleted) {
+      await trackActivity(currentActivity.id, 'completed');
+      trackEvent('activity_complete', currentActivity.id);
+    }
     
-    // Track analytics
-    trackEvent('activity_complete', currentActivity.id);
+    // Reset completion state
+    setActivityCompleted(false);
+    setIsCompleting(false);
     
     // Load next activity
     loadNextActivity();
-  }, [currentActivity, loadNextActivity]);
+  }, [currentActivity, loadNextActivity, activityCompleted]);
 
   // Handle replay - restart current activity (don't mark as done)
   const handleReplay = useCallback(() => {
     if (!currentActivity || isCompleting) return;
+    
+    // Reset completion state
+    setActivityCompleted(false);
     
     // Force complete re-render by incrementing replay key
     // This will cause ActivityRenderer to remount with fresh state
@@ -206,6 +215,7 @@ function Feed() {
       }
     } else {
       if (isUpSwipe) {
+        // Swipe up always goes to next activity (works even if activity is completed)
         handleNext();
       }
     }
@@ -286,7 +296,9 @@ function Feed() {
               onComplete={handleComplete}
               onSkip={handleSkip}
               onReplay={handleReplay}
+              onNext={handleNext}
               replayKey={replayKey}
+              isCompleted={activityCompleted}
             />
           </motion.div>
         </AnimatePresence>
