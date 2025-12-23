@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Feed from './components/Feed.jsx';
-import AdminDashboard from './components/AdminDashboard.jsx';
 import { trackEvent } from './utils/analytics.js';
+
+// Lazy load AdminDashboard to avoid circular dependencies
+const AdminDashboard = lazy(() => import('./components/AdminDashboard.jsx'));
 
 function App() {
   useEffect(() => {
@@ -40,10 +42,12 @@ function App() {
   return (
     <Router>
       <div className="h-full w-full bg-black text-white">
-        <Routes>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/" element={<Feed />} />
-        </Routes>
+        <Suspense fallback={<div className="h-full w-full flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <Routes>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/" element={<Feed />} />
+          </Routes>
+        </Suspense>
       </div>
     </Router>
   );
