@@ -283,10 +283,6 @@ function getFallbackContent(type, context) {
 
   const options = fallbacks[type] || ['Something went wrong!'];
   return options[Math.floor(Math.random() * options.length)];
-  };
-
-  const options = fallbacks[type] || ['Something went wrong!'];
-  return options[Math.floor(Math.random() * options.length)];
 }
 
 export default router;
