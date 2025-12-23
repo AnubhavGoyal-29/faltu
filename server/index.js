@@ -16,6 +16,13 @@ const aiRoutes = require('./routes/ai');
 app.use('/api/ai', aiRoutes);
 
 // Database Setup (MySQL)
+console.log('DB Config:', {
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    database: process.env.DB_NAME || 'faltuverse',
+    password_len: (process.env.DB_PASSWORD || '').length
+});
+
 const db = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
