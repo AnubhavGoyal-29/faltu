@@ -43,15 +43,16 @@ if (process.env.NODE_ENV === 'production') {
   // Serve static files with proper headers
   app.use(express.static(clientDist, {
     setHeaders: (res, path) => {
-      // Remove restrictive CSP for static assets
+      // Set CSP headers for HTML files
       if (path.endsWith('.html')) {
-        res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://faltuverse.cloud http://localhost:3000;");
+        res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://faltuverse.cloud http://localhost:3000 https://api.openai.com; frame-src 'self' blob:;");
       }
     }
   }));
   
-  // SPA fallback
+  // SPA fallback - serve index.html for all routes
   app.get('*', (req, res) => {
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://faltuverse.cloud http://localhost:3000 https://api.openai.com; frame-src 'self' blob:;");
     res.sendFile(join(clientDist, 'index.html'));
   });
 }
