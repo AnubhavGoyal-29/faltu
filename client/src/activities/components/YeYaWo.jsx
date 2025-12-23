@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent, parseAIContent } from '../../utils/ai.js';
 
 const CHOICES = [
   { left: "Pizza", right: "Burger" },
@@ -17,10 +18,39 @@ const CHOICES = [
 function YeYaWo({ activity, onComplete }) {
   const [choice, setChoice] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const randomChoice = CHOICES[Math.floor(Math.random() * CHOICES.length)];
-    setChoice(randomChoice);
+    const loadChoice = async () => {
+      try {
+        // Try to generate AI choice pair
+        const aiContent = await generateAIContent('ye_ya_wo');
+        const parsed = parseAIContent(aiContent);
+        
+        if (parsed && typeof parsed === 'string') {
+          // Parse "Option1, Option2" format
+          const parts = parsed.split(',').map(s => s.trim());
+          if (parts.length === 2) {
+            setChoice({ left: parts[0], right: parts[1] });
+          } else {
+            throw new Error('Invalid format');
+          }
+        } else if (parsed && parsed.left && parsed.right) {
+          setChoice(parsed);
+        } else {
+          throw new Error('Invalid format');
+        }
+      } catch (error) {
+        console.error('Error generating choice:', error);
+        // Fallback to hardcoded choices
+        const randomChoice = CHOICES[Math.floor(Math.random() * CHOICES.length)];
+        setChoice(randomChoice);
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    loadChoice();
   }, []);
 
   const handleSelect = (side) => {
@@ -32,7 +62,13 @@ function YeYaWo({ activity, onComplete }) {
     }, 1500);
   };
 
-  if (!choice) return null;
+  if (!choice || isGenerating) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-white/50">Loading choices...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-900 to-purple-900">

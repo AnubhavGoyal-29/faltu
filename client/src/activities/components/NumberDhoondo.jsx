@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent } from '../../utils/ai.js';
 
 function NumberDhoondo({ activity, onComplete }) {
   const [target, setTarget] = useState(0);
@@ -7,18 +8,44 @@ function NumberDhoondo({ activity, onComplete }) {
   const [guess, setGuess] = useState('');
   const [attempts, setAttempts] = useState(3);
   const [result, setResult] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const num = Math.floor(Math.random() * 100) + 1;
-    setTarget(num);
-    
-    if (num < 33) {
-      setHint('Between 1-33');
-    } else if (num < 66) {
-      setHint('Between 34-66');
-    } else {
-      setHint('Between 67-100');
-    }
+    const loadNumber = async () => {
+      const num = Math.floor(Math.random() * 100) + 1;
+      setTarget(num);
+      
+      try {
+        // Try to generate AI hint
+        const aiHint = await generateAIContent('number_dhoondo', { number: num });
+        if (aiHint && typeof aiHint === 'string') {
+          setHint(aiHint);
+        } else {
+          // Fallback to simple range hints
+          if (num < 33) {
+            setHint('Between 1-33');
+          } else if (num < 66) {
+            setHint('Between 34-66');
+          } else {
+            setHint('Between 67-100');
+          }
+        }
+      } catch (error) {
+        console.error('Error generating hint:', error);
+        // Fallback to simple range hints
+        if (num < 33) {
+          setHint('Between 1-33');
+        } else if (num < 66) {
+          setHint('Between 34-66');
+        } else {
+          setHint('Between 67-100');
+        }
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    loadNumber();
   }, []);
 
   const handleGuess = () => {
@@ -38,7 +65,13 @@ function NumberDhoondo({ activity, onComplete }) {
     }
   };
 
-  if (!target) return null;
+  if (!target || isGenerating) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-white/50">Generating hint...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-indigo-900 to-blue-900">

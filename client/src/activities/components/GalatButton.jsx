@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent } from '../../utils/ai.js';
 
 const JUDGMENTS = [
   "You chose... poorly.",
@@ -14,11 +15,26 @@ function GalatButton({ activity, onComplete }) {
   const [selected, setSelected] = useState(null);
   const [judgment, setJudgment] = useState(null);
 
-  const handleSelect = (index) => {
+  const handleSelect = async (index) => {
     if (selected !== null) return;
     setSelected(index);
-    const randomJudgment = JUDGMENTS[Math.floor(Math.random() * JUDGMENTS.length)];
-    setJudgment(randomJudgment);
+    
+    try {
+      // Try to generate AI judgment
+      const aiJudgment = await generateAIContent('galat_button');
+      if (aiJudgment && typeof aiJudgment === 'string') {
+        setJudgment(aiJudgment);
+      } else {
+        // Fallback to hardcoded judgments
+        const randomJudgment = JUDGMENTS[Math.floor(Math.random() * JUDGMENTS.length)];
+        setJudgment(randomJudgment);
+      }
+    } catch (error) {
+      console.error('Error generating judgment:', error);
+      // Fallback to hardcoded judgments
+      const randomJudgment = JUDGMENTS[Math.floor(Math.random() * JUDGMENTS.length)];
+      setJudgment(randomJudgment);
+    }
     
     setTimeout(() => {
       onComplete();

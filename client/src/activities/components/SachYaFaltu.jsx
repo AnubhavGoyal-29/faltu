@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent } from '../../utils/ai.js';
 
 const FACTS = [
   { text: "Bananas are berries, but strawberries aren't.", answer: true },
@@ -18,10 +19,33 @@ function SachYaFaltu({ activity, onComplete }) {
   const [fact, setFact] = useState(null);
   const [selected, setSelected] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const randomFact = FACTS[Math.floor(Math.random() * FACTS.length)];
-    setFact(randomFact);
+    const loadFact = async () => {
+      try {
+        // Try to generate AI fact
+        const aiFactText = await generateAIContent('sach_ya_faltu');
+        
+        if (aiFactText && typeof aiFactText === 'string') {
+          // Randomly assign true/false for AI-generated facts
+          setFact({ text: aiFactText, answer: Math.random() > 0.5 });
+        } else {
+          // Fallback to hardcoded facts
+          const randomFact = FACTS[Math.floor(Math.random() * FACTS.length)];
+          setFact(randomFact);
+        }
+      } catch (error) {
+        console.error('Error generating fact:', error);
+        // Fallback to hardcoded facts
+        const randomFact = FACTS[Math.floor(Math.random() * FACTS.length)];
+        setFact(randomFact);
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    loadFact();
   }, []);
 
   const handleChoice = (choice) => {

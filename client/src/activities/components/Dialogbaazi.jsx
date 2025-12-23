@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent, parseAIContent } from '../../utils/ai.js';
 
 const DIALOGUES = [
   {
@@ -22,10 +23,31 @@ const DIALOGUES = [
 function Dialogbaazi({ activity, onComplete }) {
   const [question, setQuestion] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const randomQ = DIALOGUES[Math.floor(Math.random() * DIALOGUES.length)];
-    setQuestion(randomQ);
+    const loadQuestion = async () => {
+      try {
+        // Try to generate AI dialogue
+        const aiContent = await generateAIContent('dialogbaazi');
+        const parsed = parseAIContent(aiContent);
+        
+        if (parsed && parsed.dialogue && parsed.options && Array.isArray(parsed.options) && typeof parsed.answer === 'number') {
+          setQuestion(parsed);
+        } else {
+          throw new Error('Invalid format');
+        }
+      } catch (error) {
+        console.error('Error generating dialogue:', error);
+        // Fallback to hardcoded dialogues
+        const randomQ = DIALOGUES[Math.floor(Math.random() * DIALOGUES.length)];
+        setQuestion(randomQ);
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    loadQuestion();
   }, []);
 
   const handleSelect = (index) => {
@@ -37,7 +59,13 @@ function Dialogbaazi({ activity, onComplete }) {
     }, 2000);
   };
 
-  if (!question) return null;
+  if (!question || isGenerating) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-white/50">Generating dialogue...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-rose-900 to-pink-900">

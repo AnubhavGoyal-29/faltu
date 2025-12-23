@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent, parseAIContent } from '../../utils/ai.js';
 
 const WORDS = [
   { scrambled: "HALP", answer: "PHAL" },
@@ -13,10 +14,31 @@ function UltaPultaShabd({ activity, onComplete }) {
   const [guess, setGuess] = useState('');
   const [timeLeft, setTimeLeft] = useState(15);
   const [result, setResult] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-    setWord(randomWord);
+    const loadWord = async () => {
+      try {
+        // Try to generate AI scrambled word
+        const aiContent = await generateAIContent('ulta_pulta_shabd');
+        const parsed = parseAIContent(aiContent);
+        
+        if (parsed && parsed.scrambled && parsed.answer) {
+          setWord(parsed);
+        } else {
+          throw new Error('Invalid format');
+        }
+      } catch (error) {
+        console.error('Error generating word:', error);
+        // Fallback to hardcoded words
+        const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+        setWord(randomWord);
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    loadWord();
   }, []);
 
   useEffect(() => {
@@ -46,7 +68,13 @@ function UltaPultaShabd({ activity, onComplete }) {
     }
   };
 
-  if (!word) return null;
+  if (!word || isGenerating) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-white/50">Generating word...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-violet-900 to-purple-900">

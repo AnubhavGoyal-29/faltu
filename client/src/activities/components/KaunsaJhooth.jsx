@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent, parseAIContent } from '../../utils/ai.js';
 
 const STATEMENTS = [
   {
@@ -31,10 +32,31 @@ const STATEMENTS = [
 function KaunsaJhooth({ activity, onComplete }) {
   const [question, setQuestion] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const randomQ = STATEMENTS[Math.floor(Math.random() * STATEMENTS.length)];
-    setQuestion(randomQ);
+    const loadQuestion = async () => {
+      try {
+        // Try to generate AI statements
+        const aiContent = await generateAIContent('kaunsa_jhooth');
+        const parsed = parseAIContent(aiContent);
+        
+        if (parsed && parsed.statements && Array.isArray(parsed.statements) && typeof parsed.fakeIndex === 'number') {
+          setQuestion(parsed);
+        } else {
+          throw new Error('Invalid format');
+        }
+      } catch (error) {
+        console.error('Error generating statements:', error);
+        // Fallback to hardcoded statements
+        const randomQ = STATEMENTS[Math.floor(Math.random() * STATEMENTS.length)];
+        setQuestion(randomQ);
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    loadQuestion();
   }, []);
 
   const handleSelect = (index) => {
@@ -46,7 +68,13 @@ function KaunsaJhooth({ activity, onComplete }) {
     }, 2000);
   };
 
-  if (!question) return null;
+  if (!question || isGenerating) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-white/50">Generating statements...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-red-900 to-pink-900">

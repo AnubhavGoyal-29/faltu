@@ -24,3 +24,15 @@ export async function generateAIContent(type, context = {}) {
   }
 }
 
+// Helper to parse JSON content if needed
+export function parseAIContent(content) {
+  if (typeof content === 'string') {
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      return content;
+    }
+  }
+  return content;
+}
+

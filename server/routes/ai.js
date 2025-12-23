@@ -48,9 +48,50 @@ router.post('/generate', async (req, res) => {
         maxTokens = 50;
         break;
 
+      case 'sach_ya_faltu':
+        prompt = `Generate an interesting fact that could be true or false. Make it surprising and believable. Format as a single statement. Keep it under 100 characters. Examples: "Octopuses have three hearts", "Bananas are berries but strawberries aren't"`;
+        maxTokens = 80;
+        break;
+
+      case 'ye_ya_wo':
+        prompt = `Generate a fun choice pair for "Ye Ya Wo" game. Two simple, relatable options separated by comma. Keep each option under 15 characters. Examples: "Pizza, Burger", "Summer, Winter", "Coffee, Tea"`;
+        maxTokens = 40;
+        break;
+
+      case 'kaunsa_jhooth':
+        prompt = `Generate 3 statements: 2 true facts and 1 believable fake fact. Format as JSON: {"statements": ["statement1", "statement2", "statement3"], "fakeIndex": 0 or 1 or 2}. Make the fake one very believable. Keep each statement under 80 characters.`;
+        maxTokens = 150;
+        break;
+
+      case 'galat_button':
+        prompt = `Generate a funny, playful judgment/comment for someone who picked a random button. Keep it under 60 characters. Make it humorous but not mean. Examples: "You chose... poorly.", "Interesting choice...", "Bold move."`;
+        maxTokens = 50;
+        break;
+
+      case 'shabdbaazi':
+        prompt = `Generate a Hinglish word (Hindi-English mix) with a hint. Format as JSON: {"word": "WORD_IN_CAPS", "hint": "hint description", "answer": "WORD_IN_CAPS"}. Keep word 4-8 letters, hint under 30 characters. Examples: {"word": "CHUTKULA", "hint": "Funny thing", "answer": "CHUTKULA"}`;
+        maxTokens = 80;
+        break;
+
+      case 'dialogbaazi':
+        prompt = `Generate a famous Indian movie dialogue (Hindi/Bollywood) with 3 movie options where one is correct. Format as JSON: {"dialogue": "dialogue text", "options": ["movie1", "movie2", "movie3"], "answer": 0}. Keep dialogue under 100 characters.`;
+        maxTokens = 120;
+        break;
+
+      case 'ulta_pulta_shabd':
+        prompt = `Generate a scrambled Hindi/English word with its answer. Format as JSON: {"scrambled": "SCRAMBLED_WORD", "answer": "CORRECT_WORD"}. Keep word 4-6 letters. Make it fun and solvable.`;
+        maxTokens = 60;
+        break;
+
+      case 'number_dhoondo':
+        const number = context?.number || 50;
+        prompt = `Generate a creative, fun hint for the number ${number} (between 1-100). Make it interesting and playful. Keep it under 50 characters. Examples: "Between 1-33", "A lucky number", "Close to half century"`;
+        maxTokens = 50;
+        break;
+
       default:
         return res.status(400).json({ 
-          error: 'Invalid type. Supported: gentle_roast, bekaar_salah, faltu_joke, naam_jodi' 
+          error: 'Invalid type. Supported: gentle_roast, bekaar_salah, faltu_joke, naam_jodi, sach_ya_faltu, ye_ya_wo, kaunsa_jhooth, galat_button, shabdbaazi, dialogbaazi, ulta_pulta_shabd, number_dhoondo' 
         });
     }
 
@@ -79,7 +120,41 @@ router.post('/generate', async (req, res) => {
       temperature: 0.9
     });
 
-    const content = completion.choices[0]?.message?.content?.trim() || getFallbackContent(type, context);
+    let content = completion.choices[0]?.message?.content?.trim() || getFallbackContent(type, context);
+    
+    // Try to parse JSON for activities that need structured data
+    const jsonTypes = ['kaunsa_jhooth', 'shabdbaazi', 'dialogbaazi', 'ulta_pulta_shabd', 'ye_ya_wo'];
+    if (jsonTypes.includes(type)) {
+      try {
+        // Try to extract JSON from response if wrapped in text
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          content = JSON.parse(jsonMatch[0]);
+        } else if (type === 'ye_ya_wo' && content.includes(',')) {
+          // Handle "Option1, Option2" format for ye_ya_wo
+          const parts = content.split(',').map(s => s.trim());
+          if (parts.length === 2) {
+            content = { left: parts[0], right: parts[1] };
+          } else {
+            throw new Error('Invalid format');
+          }
+        } else {
+          content = JSON.parse(content);
+        }
+      } catch (e) {
+        // If parsing fails, use fallback
+        const fallback = getFallbackContent(type, context);
+        try {
+          if (typeof fallback === 'string' && fallback.startsWith('{')) {
+            content = JSON.parse(fallback);
+          } else {
+            content = fallback;
+          }
+        } catch (e2) {
+          content = fallback;
+        }
+      }
+    }
 
     res.json({
       content,
@@ -126,7 +201,88 @@ function getFallbackContent(type, context) {
       "Decent compatibility! 👍",
       "Interesting combo! 🤔",
       "Could work! 💫",
-    ]
+    ],
+    sach_ya_faltu: [
+      "Bananas are berries, but strawberries aren't.",
+      "Octopuses have three hearts.",
+      "Wombats poop in cubes.",
+      "Sharks have been around longer than trees.",
+      "Honey never spoils.",
+    ],
+    ye_ya_wo: [
+      JSON.stringify({ left: "Pizza", right: "Burger" }),
+      JSON.stringify({ left: "Summer", right: "Winter" }),
+      JSON.stringify({ left: "Beach", right: "Mountains" }),
+      JSON.stringify({ left: "Coffee", right: "Tea" }),
+      JSON.stringify({ left: "Cats", right: "Dogs" }),
+    ],
+    kaunsa_jhooth: [
+      JSON.stringify({
+        statements: [
+          "The Great Wall of China is visible from space.",
+          "Humans use 100% of their brain capacity.",
+          "Bats are blind.",
+        ],
+        fakeIndex: 0,
+      }),
+      JSON.stringify({
+        statements: [
+          "Sharks can't get cancer.",
+          "Goldfish have a 3-second memory.",
+          "Humans have five senses.",
+        ],
+        fakeIndex: 1,
+      }),
+    ],
+    galat_button: [
+      "You chose... poorly.",
+      "Interesting choice...",
+      "Hmm, okay.",
+      "Really? That one?",
+      "Bold move.",
+    ],
+    shabdbaazi: [
+      JSON.stringify({ word: "CHUTKULA", hint: "Funny thing", answer: "CHUTKULA" }),
+      JSON.stringify({ word: "JUGAAD", hint: "Creative solution", answer: "JUGAAD" }),
+      JSON.stringify({ word: "FIRANGI", hint: "Foreigner", answer: "FIRANGI" }),
+    ],
+    dialogbaazi: [
+      JSON.stringify({
+        dialogue: "Kitne aadmi the?",
+        options: ["Sholay", "Dilwale", "3 Idiots"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Mogambo khush hua",
+        options: ["Mr. India", "Don", "Agneepath"],
+        answer: 0,
+      }),
+    ],
+    ulta_pulta_shabd: [
+      JSON.stringify({ scrambled: "HALP", answer: "PHAL" }),
+      JSON.stringify({ scrambled: "KAMAB", answer: "KAMAB" }),
+      JSON.stringify({ scrambled: "RATAP", answer: "PATAR" }),
+    ],
+    number_dhoondo: [
+      "Between 1-33",
+      "Between 34-66",
+      "Between 67-100",
+    ],
+  };
+
+  // Handle JSON fallbacks
+  if (type === 'kaunsa_jhooth' || type === 'shabdbaazi' || type === 'dialogbaazi' || type === 'ulta_pulta_shabd' || type === 'ye_ya_wo') {
+    const jsonOptions = fallbacks[type] || [];
+    const selected = jsonOptions[Math.floor(Math.random() * jsonOptions.length)];
+    try {
+      return JSON.parse(selected);
+    } catch (e) {
+      return selected;
+    }
+  }
+
+  const options = fallbacks[type] || ['Something went wrong!'];
+  return options[Math.floor(Math.random() * options.length)];
   };
 
   const options = fallbacks[type] || ['Something went wrong!'];

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent, parseAIContent } from '../../utils/ai.js';
 
 const WORDS = [
   { word: "CHUTKULA", hint: "Funny thing", answer: "CHUTKULA" },
@@ -13,10 +14,31 @@ function Shabdbaazi({ activity, onComplete }) {
   const [guess, setGuess] = useState('');
   const [attempts, setAttempts] = useState(3);
   const [result, setResult] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-    setWord(randomWord);
+    const loadWord = async () => {
+      try {
+        // Try to generate AI word
+        const aiContent = await generateAIContent('shabdbaazi');
+        const parsed = parseAIContent(aiContent);
+        
+        if (parsed && parsed.word && parsed.hint && parsed.answer) {
+          setWord(parsed);
+        } else {
+          throw new Error('Invalid format');
+        }
+      } catch (error) {
+        console.error('Error generating word:', error);
+        // Fallback to hardcoded words
+        const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+        setWord(randomWord);
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    loadWord();
   }, []);
 
   const handleGuess = () => {
@@ -35,7 +57,13 @@ function Shabdbaazi({ activity, onComplete }) {
     }
   };
 
-  if (!word) return null;
+  if (!word || isGenerating) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-white/50">Generating word...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-cyan-900 to-blue-900">
