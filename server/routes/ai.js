@@ -15,10 +15,9 @@ const SYSTEM_PROMPTS = {
 };
 
 router.post('/generate', async (req, res) => {
+    const { type, context } = req.body;
     try {
-        const { type, context } = req.body;
-
-        if (!SYSTEM_PROMPTS[type]) {
+        if (!type || !SYSTEM_PROMPTS[type]) {
             return res.status(400).json({ error: 'Invalid type' });
         }
 
@@ -49,7 +48,8 @@ router.post('/generate', async (req, res) => {
             joke: "Why did the AI cross the road? To escape your requests.",
             compatibility: "0% - Server says no.",
         };
-        res.json({ result: FALLBACKS[type] || "Error" });
+        const safeType = type && FALLBACKS[type] ? type : 'joke'; // Default to a safe fallback
+        res.json({ result: FALLBACKS[safeType] || "Error" });
     }
 });
 
