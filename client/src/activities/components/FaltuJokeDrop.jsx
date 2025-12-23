@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent } from '../../utils/ai.js';
 
 const JOKES = [
   "Why don't scientists trust atoms? Because they make up everything!",
@@ -17,14 +18,35 @@ const JOKES = [
 function FaltuJokeDrop({ activity, onComplete }) {
   const [joke, setJoke] = useState(null);
   const [showJoke, setShowJoke] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const randomJoke = JOKES[Math.floor(Math.random() * JOKES.length)];
-    setJoke(randomJoke);
-    
-    setTimeout(() => {
-      setShowJoke(true);
-    }, 500);
+    const loadJoke = async () => {
+      try {
+        // Try to generate AI joke
+        const aiJoke = await generateAIContent('faltu_joke');
+        
+        if (aiJoke) {
+          setJoke(aiJoke);
+        } else {
+          // Fallback to hardcoded jokes
+          const randomJoke = JOKES[Math.floor(Math.random() * JOKES.length)];
+          setJoke(randomJoke);
+        }
+      } catch (error) {
+        console.error('Error generating joke:', error);
+        // Fallback to hardcoded jokes
+        const randomJoke = JOKES[Math.floor(Math.random() * JOKES.length)];
+        setJoke(randomJoke);
+      } finally {
+        setIsGenerating(false);
+        setTimeout(() => {
+          setShowJoke(true);
+        }, 500);
+      }
+    };
+
+    loadJoke();
   }, []);
 
   useEffect(() => {
@@ -58,7 +80,9 @@ function FaltuJokeDrop({ activity, onComplete }) {
             </p>
           </motion.div>
         ) : (
-          <div className="text-white/50">Loading joke...</div>
+          <div className="text-white/50">
+            {isGenerating ? 'Generating joke...' : 'Loading...'}
+          </div>
         )}
       </motion.div>
     </div>

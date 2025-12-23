@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent } from '../../utils/ai.js';
 
 const ROASTS = [
   "You're like a cloud - when you disappear, it's a beautiful day.",
@@ -17,14 +18,35 @@ const ROASTS = [
 function GentleRoast({ activity, onComplete }) {
   const [roast, setRoast] = useState(null);
   const [showRoast, setShowRoast] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
-    const randomRoast = ROASTS[Math.floor(Math.random() * ROASTS.length)];
-    setRoast(randomRoast);
-    
-    setTimeout(() => {
-      setShowRoast(true);
-    }, 500);
+    const loadRoast = async () => {
+      try {
+        // Try to generate AI roast
+        const aiRoast = await generateAIContent('gentle_roast');
+        
+        if (aiRoast) {
+          setRoast(aiRoast);
+        } else {
+          // Fallback to hardcoded roasts
+          const randomRoast = ROASTS[Math.floor(Math.random() * ROASTS.length)];
+          setRoast(randomRoast);
+        }
+      } catch (error) {
+        console.error('Error generating roast:', error);
+        // Fallback to hardcoded roasts
+        const randomRoast = ROASTS[Math.floor(Math.random() * ROASTS.length)];
+        setRoast(randomRoast);
+      } finally {
+        setIsGenerating(false);
+        setTimeout(() => {
+          setShowRoast(true);
+        }, 500);
+      }
+    };
+
+    loadRoast();
   }, []);
 
   useEffect(() => {
@@ -58,7 +80,9 @@ function GentleRoast({ activity, onComplete }) {
             </p>
           </motion.div>
         ) : (
-          <div className="text-white/50">Generating roast...</div>
+          <div className="text-white/50">
+            {isGenerating ? 'Generating roast...' : 'Loading...'}
+          </div>
         )}
       </motion.div>
     </div>

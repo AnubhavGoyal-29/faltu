@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { generateAIContent } from '../../utils/ai.js';
 
 const COMPATIBILITY_RESULTS = [
   "Perfect match! 🌟",
@@ -14,18 +15,42 @@ function NaamJodi({ activity, onComplete }) {
   const [name1, setName1] = useState('');
   const [name2, setName2] = useState('');
   const [result, setResult] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (name1.trim() && name2.trim()) {
-      const randomResult = COMPATIBILITY_RESULTS[
-        Math.floor(Math.random() * COMPATIBILITY_RESULTS.length)
-      ];
-      setResult(randomResult);
+      setIsGenerating(true);
       
-      setTimeout(() => {
-        onComplete();
-      }, 2500);
+      try {
+        // Try to generate AI compatibility result
+        const aiResult = await generateAIContent('naam_jodi', {
+          name1: name1.trim(),
+          name2: name2.trim()
+        });
+        
+        if (aiResult) {
+          setResult(aiResult);
+        } else {
+          // Fallback to hardcoded results
+          const randomResult = COMPATIBILITY_RESULTS[
+            Math.floor(Math.random() * COMPATIBILITY_RESULTS.length)
+          ];
+          setResult(randomResult);
+        }
+      } catch (error) {
+        console.error('Error generating compatibility:', error);
+        // Fallback to hardcoded results
+        const randomResult = COMPATIBILITY_RESULTS[
+          Math.floor(Math.random() * COMPATIBILITY_RESULTS.length)
+        ];
+        setResult(randomResult);
+      } finally {
+        setIsGenerating(false);
+        setTimeout(() => {
+          onComplete();
+        }, 2500);
+      }
     }
   };
 
@@ -61,9 +86,10 @@ function NaamJodi({ activity, onComplete }) {
             />
             <button
               type="submit"
-              className="w-full py-4 bg-pink-500 text-white rounded-xl font-bold text-lg hover:bg-pink-600 transition"
+              disabled={isGenerating}
+              className="w-full py-4 bg-pink-500 text-white rounded-xl font-bold text-lg hover:bg-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Check Compatibility
+              {isGenerating ? 'Checking...' : 'Check Compatibility'}
             </button>
           </form>
         ) : (

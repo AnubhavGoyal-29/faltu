@@ -8,6 +8,7 @@ import { initDb } from './db/mysql.js';
 import { initRedis } from './db/redis.js';
 import eventRoutes from './routes/events.js';
 import activityRoutes from './routes/activities.js';
+import aiRoutes from './routes/ai.js';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/event', eventRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
