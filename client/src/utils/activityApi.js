@@ -48,3 +48,23 @@ export async function trackActivity(activityId, status) {
   }
 }
 
+// Reset all activities for user (restart)
+export async function resetActivities() {
+  const anonymousUserId = getAnonymousUserId();
+  
+  try {
+    const response = await fetch(`${API_BASE}/reset?anonymous_user_id=${anonymousUserId}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to reset activities');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Reset activities error:', error);
+    return null;
+  }
+}
+

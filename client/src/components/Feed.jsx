@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ActivityRenderer from './ActivityRenderer.jsx';
 import HomePage from './HomePage.jsx';
 import CompletionScreen from './CompletionScreen.jsx';
+import ExitScreen from './ExitScreen.jsx';
 import { trackEvent } from '../utils/analytics.js';
-import { getNextActivity, trackActivity } from '../utils/activityApi.js';
+import { getNextActivity, trackActivity, resetActivities } from '../utils/activityApi.js';
 
 const STORAGE_KEY_HAS_STARTED = 'faltuverse_has_started';
 
@@ -15,6 +16,7 @@ function Feed() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isAllCompleted, setIsAllCompleted] = useState(false);
+  const [showExitScreen, setShowExitScreen] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
 
   // Load next activity from backend
@@ -131,21 +133,41 @@ function Feed() {
 
   // Handle restart from completion screen
   const handleRestart = async () => {
-    // Clear localStorage
-    localStorage.removeItem(STORAGE_KEY_HAS_STARTED);
-    
-    // Reset state
-    setIsAllCompleted(false);
-    setCurrentActivity(null);
-    setProgress({ completed: 0, total: 20, remaining: 20 });
-    
-    // Reset to homepage
-    setShowHomePage(true);
+    try {
+      // Clear all activities from database
+      await resetActivities();
+      
+      // Clear localStorage
+      localStorage.removeItem(STORAGE_KEY_HAS_STARTED);
+      
+      // Reset state
+      setIsAllCompleted(false);
+      setShowExitScreen(false);
+      setCurrentActivity(null);
+      setProgress({ completed: 0, total: 20, remaining: 20 });
+      setReplayKey(0);
+      
+      // Reset to homepage
+      setShowHomePage(true);
+      
+      // Track restart event
+      trackEvent('session_restart', null, { method: 'completion_screen' });
+    } catch (error) {
+      console.error('Restart error:', error);
+      // Even if API fails, reset local state
+      localStorage.removeItem(STORAGE_KEY_HAS_STARTED);
+      setIsAllCompleted(false);
+      setShowExitScreen(false);
+      setCurrentActivity(null);
+      setProgress({ completed: 0, total: 20, remaining: 20 });
+      setShowHomePage(true);
+    }
   };
 
   // Handle exit
   const handleExit = () => {
     trackEvent('session_end', null, { method: 'user_exit' });
+    setShowExitScreen(true);
   };
 
   // Swipe handlers
@@ -196,6 +218,11 @@ function Feed() {
         <div className="text-white">Loading...</div>
       </div>
     );
+  }
+
+  // Show exit screen
+  if (showExitScreen) {
+    return <ExitScreen />;
   }
 
   // Show homepage for new users

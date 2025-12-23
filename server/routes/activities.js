@@ -183,6 +183,37 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// DELETE /api/activities/reset - Clear all activities for a user (restart)
+router.delete('/reset', async (req, res) => {
+  try {
+    const { anonymous_user_id } = req.query;
+
+    if (!anonymous_user_id) {
+      return res.status(400).json({ 
+        error: 'anonymous_user_id is required' 
+      });
+    }
+
+    const db = getDb();
+    
+    // Delete all activities for this user
+    await db.query(
+      `DELETE FROM user_activities WHERE anonymous_user_id = ?`,
+      [anonymous_user_id]
+    );
+
+    res.json({ 
+      success: true,
+      message: 'All activities cleared for user'
+    });
+  } catch (error) {
+    console.error('Reset activities error:', error);
+    res.status(500).json({ 
+      error: 'Failed to reset activities' 
+    });
+  }
+});
+
 // GET /api/activities/users - Get all users with their activities (for admin)
 router.get('/users', async (req, res) => {
   try {
