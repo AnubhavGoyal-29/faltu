@@ -1,0 +1,49 @@
+============================================
+FALTUVERSE SERVER SETUP - COPY PASTE THESE COMMANDS
+============================================
+
+# Step 1: SSH into server
+ssh root@72.61.170.102
+# Password: ai-247@Solutions
+
+# Step 2: Copy and paste this entire block:
+cd /var/www && git clone https://github.com/AnubhavGoyal-29/faltu.git faltuverse && cd faltuverse && git checkout main && chmod +x install.sh && bash install.sh
+
+# Step 3: After installation completes, setup SSL (optional but recommended):
+apt install -y certbot python3-certbot-nginx
+certbot --nginx -d faltuverse.cloud -d www.faltuverse.cloud
+
+# Step 4: Verify everything is working:
+pm2 status
+pm2 logs faltuverse
+
+# Your app should now be live at: https://faltuverse.cloud
+
+============================================
+TROUBLESHOOTING
+============================================
+
+# If MySQL password prompt appears during install.sh, run this separately:
+mysql -u root << 'EOF'
+CREATE DATABASE IF NOT EXISTS faltuverse;
+CREATE USER IF NOT EXISTS 'faltuverse'@'localhost' IDENTIFIED BY 'Faltuverse@2024!';
+GRANT ALL PRIVILEGES ON faltuverse.* TO 'faltuverse'@'localhost';
+FLUSH PRIVILEGES;
+EOF
+
+# Check if services are running:
+systemctl status mysql
+systemctl status redis-server
+systemctl status nginx
+pm2 status
+
+# Restart if needed:
+pm2 restart faltuverse
+systemctl restart nginx
+
+# View logs:
+pm2 logs faltuverse
+tail -f /var/log/nginx/error.log
+
+============================================
+
