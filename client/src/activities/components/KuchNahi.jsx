@@ -10,7 +10,8 @@ function KuchNahi({ activity, onComplete }) {
       const timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            onComplete();
+            clearInterval(timer);
+            setTimeout(() => onComplete(), 500);
             return 0;
           }
           return prev - 1;

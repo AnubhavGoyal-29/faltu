@@ -50,13 +50,13 @@ function FaltuJokeDrop({ activity, onComplete }) {
   }, []);
 
   useEffect(() => {
-    if (showJoke) {
+    if (showJoke && joke) {
       const timer = setTimeout(() => {
         onComplete();
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [showJoke, onComplete]);
+  }, [showJoke, joke, onComplete]);
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-fuchsia-900 to-purple-900">

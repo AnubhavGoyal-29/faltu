@@ -119,14 +119,15 @@ function Feed() {
 
   // Handle replay - restart current activity (don't mark as done)
   const handleReplay = useCallback(() => {
-    if (!currentActivity) return;
+    if (!currentActivity || isCompleting) return;
     
-    // Force re-render by incrementing replay key
+    // Force complete re-render by incrementing replay key
+    // This will cause ActivityRenderer to remount with fresh state
     setReplayKey(prev => prev + 1);
     
     // Track replay
     trackEvent('activity_replay', currentActivity.id);
-  }, [currentActivity]);
+  }, [currentActivity, isCompleting]);
 
   // Handle restart from completion screen
   const handleRestart = async () => {

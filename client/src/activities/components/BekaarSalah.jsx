@@ -50,13 +50,13 @@ function BekaarSalah({ activity, onComplete }) {
   }, []);
 
   useEffect(() => {
-    if (showAdvice) {
+    if (showAdvice && advice) {
       const timer = setTimeout(() => {
         onComplete();
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [showAdvice, onComplete]);
+  }, [showAdvice, advice, onComplete]);
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-yellow-900 to-orange-900">

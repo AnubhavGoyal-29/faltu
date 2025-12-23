@@ -15,7 +15,7 @@ function ActivityRenderer({ activity, onComplete, onSkip, onReplay, replayKey })
   return (
     <div className="h-full w-full relative">
       <ActivityComponent
-        key={replayKey}
+        key={`${activity.id}-${replayKey}`}
         activity={activity}
         onComplete={onComplete}
         onSkip={onSkip}

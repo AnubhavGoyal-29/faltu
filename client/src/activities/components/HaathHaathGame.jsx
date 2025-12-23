@@ -14,9 +14,10 @@ function HaathHaathGame({ activity, onComplete }) {
   const [userChoice, setUserChoice] = useState(null);
   const [aiChoice, setAiChoice] = useState(null);
   const [roundResult, setRoundResult] = useState(null);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   const handleChoice = (choice) => {
-    if (userChoice) return;
+    if (userChoice || isCompleted) return;
     
     const ai = CHOICES[Math.floor(Math.random() * CHOICES.length)];
     setUserChoice(choice);
@@ -24,18 +25,27 @@ function HaathHaathGame({ activity, onComplete }) {
     
     setTimeout(() => {
       if (BEATS[choice] === ai) {
-        setWins(wins + 1);
-        setRoundResult('win');
-        if (wins + 1 >= 3) {
-          setTimeout(() => onComplete(), 2000);
-        } else {
-          setTimeout(() => {
-            setRound(round + 1);
-            setUserChoice(null);
-            setAiChoice(null);
-            setRoundResult(null);
-          }, 2000);
-        }
+        // Use functional update to avoid stale state
+        setWins(prevWins => {
+          const newWins = prevWins + 1;
+          setRoundResult('win');
+          
+          if (newWins >= 3) {
+            // User won 3 times - complete activity
+            setIsCompleted(true);
+            setTimeout(() => onComplete(), 2000);
+          } else {
+            // Continue to next round
+            setTimeout(() => {
+              setRound(prevRound => prevRound + 1);
+              setUserChoice(null);
+              setAiChoice(null);
+              setRoundResult(null);
+            }, 2000);
+          }
+          
+          return newWins;
+        });
       } else if (choice === ai) {
         setRoundResult('tie');
         setTimeout(() => {
@@ -44,7 +54,9 @@ function HaathHaathGame({ activity, onComplete }) {
           setRoundResult(null);
         }, 2000);
       } else {
+        // User lost - complete activity
         setRoundResult('lose');
+        setIsCompleted(true);
         setTimeout(() => onComplete(), 2000);
       }
     }, 500);

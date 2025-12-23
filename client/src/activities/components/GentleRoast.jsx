@@ -50,13 +50,13 @@ function GentleRoast({ activity, onComplete }) {
   }, []);
 
   useEffect(() => {
-    if (showRoast) {
+    if (showRoast && roast) {
       const timer = setTimeout(() => {
         onComplete();
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [showRoast, onComplete]);
+  }, [showRoast, roast, onComplete]);
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-orange-900 to-red-900">

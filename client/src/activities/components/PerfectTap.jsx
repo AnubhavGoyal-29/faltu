@@ -29,11 +29,14 @@ function PerfectTap({ activity, onComplete }) {
     if (gameState === 'ready') {
       setGameState('playing');
     } else if (gameState === 'playing') {
-      setCount(count + 1);
-      if (count + 1 === target) {
-        setGameState('done');
-        setTimeout(() => onComplete(), 2000);
-      }
+      setCount(prevCount => {
+        const newCount = prevCount + 1;
+        if (newCount === target) {
+          setGameState('done');
+          setTimeout(() => onComplete(), 2000);
+        }
+        return newCount;
+      });
     }
   };
 
