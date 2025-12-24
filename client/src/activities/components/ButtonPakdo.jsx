@@ -110,8 +110,8 @@ function ButtonPakdo({ activity, onComplete }) {
           <motion.button
             ref={buttonRef}
             animate={{
-              x: `${position.x}%`,
-              y: `${position.y}%`,
+              left: `${position.x}%`,
+              right: `${position.y}%`,
             }}
             transition={{ 
               type: 'spring', 

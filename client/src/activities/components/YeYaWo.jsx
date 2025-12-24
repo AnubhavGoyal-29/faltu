@@ -1,27 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { generateAIContent, parseAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
-
-const CHOICES = [
-  { left: "Pizza", right: "Burger" },
-  { left: "Summer", right: "Winter" },
-  { left: "Beach", right: "Mountains" },
-  { left: "Coffee", right: "Tea" },
-  { left: "Cats", right: "Dogs" },
-  { left: "Netflix", right: "YouTube" },
-  { left: "Morning", right: "Night" },
-  { left: "Sweet", right: "Spicy" },
-  { left: "City", right: "Village" },
-  { left: "Books", right: "Movies" },
-];
 
 function YeYaWo({ activity, onComplete }) {
   const [choice, setChoice] = useState(null);
   const [selected, setSelected] = useState(null);
   const [isGenerating, setIsGenerating] = useState(true);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate calls (React StrictMode + replay button)
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
     const loadChoice = async () => {
       try {
         // Try to generate AI choice pair
@@ -43,9 +35,8 @@ function YeYaWo({ activity, onComplete }) {
         }
       } catch (error) {
         console.error('Error generating choice:', error);
-        // Fallback to hardcoded choices
-        const randomChoice = CHOICES[Math.floor(Math.random() * CHOICES.length)];
-        setChoice(randomChoice);
+        // Server should always return fallback, but if parsing fails, use default
+        setChoice({ left: "Pizza", right: "Burger" });
       } finally {
         setIsGenerating(false);
       }

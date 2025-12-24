@@ -3,15 +3,6 @@ import { motion } from 'framer-motion';
 import { generateAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
 
-const JUDGMENTS = [
-  "You chose... poorly.",
-  "Interesting choice...",
-  "Hmm, okay.",
-  "Really? That one?",
-  "You do you.",
-  "Bold move.",
-];
-
 function GalatButton({ activity, onComplete }) {
   const [selected, setSelected] = useState(null);
   const [judgment, setJudgment] = useState(null);
@@ -32,9 +23,8 @@ function GalatButton({ activity, onComplete }) {
       }
     } catch (error) {
       console.error('Error generating judgment:', error);
-      // Fallback to hardcoded judgments
-      const randomJudgment = JUDGMENTS[Math.floor(Math.random() * JUDGMENTS.length)];
-      setJudgment(randomJudgment);
+      // Server should always return fallback, but if parsing fails, use default
+      setJudgment("You chose... poorly.");
     }
     
     setTimeout(() => {

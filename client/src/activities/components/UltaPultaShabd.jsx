@@ -1,29 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { generateAIContent, parseAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
-
-const WORDS = [{ scrambled: "HALP", answer: "PHAL" },      // फल
-{ scrambled: "TAHI", answer: "HATI" },      // हाथी
-{ scrambled: "ILLIB", answer: "BILLI" },    // बिल्ली
-{ scrambled: "DNARB", answer: "BANDR" },    // बंदर
-{ scrambled: "AAVN", answer: "NAAV" },      // नाव
-{ scrambled: "GLOA", answer: "GOLA" },      // गोला
-{ scrambled: "AAMK", answer: "KAMA" },      // काम
-{ scrambled: "AAPN", answer: "PAAN" },      // पान
-{ scrambled: "HKNAP", answer: "PANKH" },    // पंख
-{ scrambled: "AGARH", answer: "GHARA" },    // घर
-{ scrambled: "RATAS", answer: "SAATR" },    // सात
-{ scrambled: "TAOR", answer: "ROTA" },      // रोटी
-{ scrambled: "AHLKE", answer: "KHELA" },    // खेला
-{ scrambled: "AGAR", answer: "RAAG" },      // राग
-{ scrambled: "ILAM", answer: "MALI" },      // माली
-{ scrambled: "AART", answer: "TAAR" },      // तार
-{ scrambled: "UGDIY", answer: "GUDIY" },    // गुड़िया
-{ scrambled: "ATHLA", answer: "LAATH" },    // लाठी
-{ scrambled: "AANK", answer: "KANA" },      // काना
-{ scrambled: "APTA", answer: "PATA" }       // पता
-];
 
 function UltaPultaShabd({ activity, onComplete }) {
   const [word, setWord] = useState(null);
@@ -31,8 +9,13 @@ function UltaPultaShabd({ activity, onComplete }) {
   const [timeLeft, setTimeLeft] = useState(15);
   const [result, setResult] = useState(null);
   const [isGenerating, setIsGenerating] = useState(true);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate calls (React StrictMode + replay button)
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
     const loadWord = async () => {
       try {
         // Try to generate AI scrambled word
@@ -46,9 +29,8 @@ function UltaPultaShabd({ activity, onComplete }) {
         }
       } catch (error) {
         console.error('Error generating word:', error);
-        // Fallback to hardcoded words
-        const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-        setWord(randomWord);
+        // Server should always return fallback, but if parsing fails, use default
+        setWord({ scrambled: "TAIHH", answer: "HATHI" });
       } finally {
         setIsGenerating(false);
       }

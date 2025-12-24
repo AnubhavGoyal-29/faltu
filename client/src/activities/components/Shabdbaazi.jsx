@@ -1,18 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { generateAIContent, parseAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
-
-const WORDS = [
-  { word: "CHUTKULA", hint: "Funny thing", answer: "CHUTKULA" },
-  { word: "JUGAAD", hint: "Creative solution", answer: "JUGAAD" },
-  { word: "FIRANGI", hint: "Foreigner", answer: "FIRANGI" },
-  { word: "BHAI", hint: "Brother/friend", answer: "BHAI" },
-  { word: "MASALA", hint: "Spice mix", answer: "MASALA" },
-  { word: "DOST", hint: "Friend", answer: "DOST" },
-  { word: "KHUSHI", hint: "Happiness", answer: "KHUSHI" },
-  { word: "PYAAR", hint: "Love", answer: "PYAAR" },
-];
 
 // Function to create word with missing letters
 function createWordWithBlanks(word, missingRatio = 0.4) {
@@ -44,14 +33,20 @@ function Shabdbaazi({ activity, onComplete }) {
   const [attempts, setAttempts] = useState(3);
   const [result, setResult] = useState(null);
   const [isGenerating, setIsGenerating] = useState(true);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate calls (React StrictMode + replay button)
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
     const loadWord = async () => {
       try {
         // Try to generate AI word
         const aiContent = await generateAIContent('shabdbaazi');
+        console.log("aiContent", aiContent);
         const parsed = parseAIContent(aiContent);
-        
+        console.log("parsed", parsed);
         if (parsed && parsed.word && parsed.hint && parsed.answer) {
           setWord(parsed);
           setDisplayWord(createWordWithBlanks(parsed.answer));
@@ -60,10 +55,10 @@ function Shabdbaazi({ activity, onComplete }) {
         }
       } catch (error) {
         console.error('Error generating word:', error);
-        // Fallback to hardcoded words
-        const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-        setWord(randomWord);
-        setDisplayWord(createWordWithBlanks(randomWord.answer));
+        // Server should always return fallback, but if parsing fails, use default
+        const defaultWord = { word: "CHUTKULA", hint: "Funny thing", answer: "CHUTKULA" };
+        setWord(defaultWord);
+        setDisplayWord(createWordWithBlanks(defaultWord.answer));
       } finally {
         setIsGenerating(false);
       }

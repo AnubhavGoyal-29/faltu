@@ -1,28 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { generateAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
-
-const FACTS = [
-  { text: "Bananas are berries, but strawberries aren't.", answer: true },
-  { text: "Octopuses have three hearts.", answer: true },
-  { text: "Wombats poop in cubes.", answer: true },
-  { text: "Sharks have been around longer than trees.", answer: true },
-  { text: "Honey never spoils.", answer: true },
-  { text: "A group of flamingos is called a 'flamboyance'.", answer: true },
-  { text: "Dolphins have names for each other.", answer: true },
-  { text: "The human brain uses 20% of the body's energy.", answer: true },
-  { text: "Cows have best friends.", answer: true },
-  { text: "Penguins can jump 6 feet in the air.", answer: false },
-];
 
 function SachYaFaltu({ activity, onComplete }) {
   const [fact, setFact] = useState(null);
   const [selected, setSelected] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [isGenerating, setIsGenerating] = useState(true);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate calls (React StrictMode + replay button)
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
     const loadFact = async () => {
       try {
         // Try to generate AI fact
@@ -38,9 +30,8 @@ function SachYaFaltu({ activity, onComplete }) {
         }
       } catch (error) {
         console.error('Error generating fact:', error);
-        // Fallback to hardcoded facts
-        const randomFact = FACTS[Math.floor(Math.random() * FACTS.length)];
-        setFact(randomFact);
+        // Server should always return fallback, but if parsing fails, use default
+        setFact({ text: "Bananas are berries, but strawberries aren't.", answer: true });
       } finally {
         setIsGenerating(false);
       }

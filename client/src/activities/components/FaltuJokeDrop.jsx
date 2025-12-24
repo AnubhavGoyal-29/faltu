@@ -3,19 +3,6 @@ import { motion } from 'framer-motion';
 import { generateAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
 
-const JOKES = [
-  "Why don't scientists trust atoms? Because they make up everything!",
-  "I told my wife she was drawing her eyebrows too high. She looked surprised.",
-  "Why don't eggs tell jokes? They'd crack each other up!",
-  "What do you call a fake noodle? An impasta!",
-  "Why did the scarecrow win an award? He was outstanding in his field!",
-  "I'm reading a book about anti-gravity. It's impossible to put down!",
-  "Why don't skeletons fight each other? They don't have the guts!",
-  "What do you call a bear with no teeth? A gummy bear!",
-  "Why did the math book look so sad? Because it had too many problems!",
-  "I used to be a baker, but I couldn't make enough dough.",
-];
-
 function FaltuJokeDrop({ activity, onComplete }) {
   const [joke, setJoke] = useState(null);
   const [showJoke, setShowJoke] = useState(false);
@@ -37,9 +24,8 @@ function FaltuJokeDrop({ activity, onComplete }) {
       }
     } catch (error) {
       console.error('Error generating joke:', error);
-      // Fallback to hardcoded jokes
-      const randomJoke = JOKES[Math.floor(Math.random() * JOKES.length)];
-      setJoke(randomJoke);
+      // Server should always return fallback, but if parsing fails, use default
+      setJoke("Why don't scientists trust atoms? Because they make up everything!");
     } finally {
       setIsGenerating(false);
       setTimeout(() => {

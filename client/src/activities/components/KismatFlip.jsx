@@ -66,7 +66,11 @@ function KismatFlip({ activity, onComplete }) {
               style={{ perspective: '1000px' }}
             >
               <motion.div
-                animate={{ rotateY: flipped ? 1800 : 0 }}
+                animate={{ 
+                  rotateY: flipped 
+                    ? (result === 'smart' ? 1800 : 1980) // 1800 = 5 full rotations (ends at 0deg/SMART), 1980 = 5.5 rotations (ends at 180deg/DUMB)
+                    : 0 
+                }}
                 transition={{ duration: 1.5, ease: "easeInOut" }}
                 style={{ 
                   transformStyle: 'preserve-3d',

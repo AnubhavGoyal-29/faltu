@@ -40,7 +40,7 @@ export const ACTIVITY_REGISTRY = [
   { id: 'faltu-joke-drop', type: 'faltu_joke_drop', name: 'Faltu Joke Drop', description: 'Read the joke' },
   { id: 'no-stress-math', type: 'no_stress_math', name: 'No-Stress Math', description: 'Solve the simple addition problem' },
   { id: 'number-dhoondo', type: 'number_dhoondo', name: 'Number Dhoondo', description: 'Guess the number (1-100) based on the hint' },
-  { id: 'haath-haath-game', type: 'haath_haath_game', name: 'Haath-Haath Game', description: 'Beat the AI in rock-paper-scissors 3 times' },
+  { id: 'haath-haath-game', type: 'haath_haath_game', name: 'Stone Paper Scissors', description: 'Best of 3 match against AI' },
 ];
 
 export const ACTIVITY_DESCRIPTIONS = {
@@ -63,7 +63,7 @@ export const ACTIVITY_DESCRIPTIONS = {
   faltu_joke_drop: 'Read the joke',
   no_stress_math: 'Solve the simple addition problem',
   number_dhoondo: 'Guess the number (1-100) based on the hint',
-  haath_haath_game: 'Beat the AI in rock-paper-scissors 3 times',
+  haath_haath_game: 'Best of 3 match against AI',
 };
 
 export const ACTIVITY_COMPONENTS = {

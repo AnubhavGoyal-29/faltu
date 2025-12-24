@@ -1,27 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { generateAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
-
-const ADVICE = [
-  "Always trust your first gut feeling, even if it's 3 AM.",
-  "If something's hard, just don't do it.",
-  "The best way to save money is to never check your bank account.",
-  "Procrastination is just future you's problem.",
-  "If you can't decide, flip a coin and then do the opposite.",
-  "The early bird gets the worm, but the second mouse gets the cheese.",
-  "If at first you don't succeed, blame someone else.",
-  "Life's too short to make your bed.",
-  "When in doubt, add more butter.",
-  "The best time to plant a tree was 20 years ago. The second best time is never.",
-];
 
 function BekaarSalah({ activity, onComplete }) {
   const [advice, setAdvice] = useState(null);
   const [showAdvice, setShowAdvice] = useState(false);
   const [isGenerating, setIsGenerating] = useState(true);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate calls (React StrictMode + replay button)
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
     const loadAdvice = async () => {
       try {
         // Try to generate AI advice
@@ -36,9 +28,8 @@ function BekaarSalah({ activity, onComplete }) {
         }
       } catch (error) {
         console.error('Error generating advice:', error);
-        // Fallback to hardcoded advice
-        const randomAdvice = ADVICE[Math.floor(Math.random() * ADVICE.length)];
-        setAdvice(randomAdvice);
+        // Server should always return fallback, but if parsing fails, use default
+        setAdvice("Always trust your first gut feeling, even if it's 3 AM.");
       } finally {
         setIsGenerating(false);
         setTimeout(() => {

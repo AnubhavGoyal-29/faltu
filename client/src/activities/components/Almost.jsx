@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
 
@@ -8,6 +8,8 @@ function Almost({ activity, onComplete }) {
   const [targetMin, setTargetMin] = useState(0);
   const [targetMax, setTargetMax] = useState(0);
   const [difference, setDifference] = useState(null);
+  const intervalRef = useRef(null);
+  const directionRef = useRef(1); // 1 for increasing, -1 for decreasing
 
   useEffect(() => {
     // Generate a target range (e.g., 30-40%, 45-55%, etc.)
@@ -17,33 +19,41 @@ function Almost({ activity, onComplete }) {
     setTargetMin(minTarget);
     setTargetMax(maxTarget);
     
-    let direction = 1; // 1 for increasing, -1 for decreasing
+    directionRef.current = 1; // Reset direction
     
-    const interval = setInterval(() => {
-      if (!stopped) {
-        setProgress((prev) => {
-          if (direction === 1) {
-            if (prev >= 100) {
-              direction = -1;
-              return 100;
-            }
-            return prev + 2;
-          } else {
-            if (prev <= 0) {
-              direction = 1;
-              return 0;
-            }
-            return prev - 2;
+    intervalRef.current = setInterval(() => {
+      setProgress((prev) => {
+        if (directionRef.current === 1) {
+          if (prev >= 100) {
+            directionRef.current = -1;
+            return 100;
           }
-        });
-      }
+          return prev + 2;
+        } else {
+          if (prev <= 0) {
+            directionRef.current = 1;
+            return 0;
+          }
+          return prev - 2;
+        }
+      });
     }, 50);
 
-    return () => clearInterval(interval);
-  }, [stopped]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   const handleStop = () => {
     if (!stopped) {
+      // Stop the interval immediately
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      
       setStopped(true);
       
       // Check if progress is within target range
@@ -96,7 +106,7 @@ function Almost({ activity, onComplete }) {
               <>
                 {/* Target range highlight */}
                 <div
-                  className="absolute top-0 h-full bg-yellow-400/30 border-l-2 border-r-2 border-yellow-400"
+                  className="absolute top-0 h-full bg-green-400/30 border-l-2 border-r-2 border-green-400"
                   style={{ 
                     left: `${targetMin}%`,
                     width: `${targetMax - targetMin}%`
@@ -104,12 +114,12 @@ function Almost({ activity, onComplete }) {
                 />
                 {/* Min marker */}
                 <div
-                  className="absolute top-0 h-full w-1 bg-yellow-400"
+                  className="absolute top-0 h-full w-1 bg-green-400"
                   style={{ left: `${targetMin}%` }}
                 />
                 {/* Max marker */}
                 <div
-                  className="absolute top-0 h-full w-1 bg-yellow-400"
+                  className="absolute top-0 h-full w-1 bg-green-400"
                   style={{ left: `${targetMax}%` }}
                 />
               </>

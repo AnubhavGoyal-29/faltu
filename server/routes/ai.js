@@ -8,11 +8,12 @@ const router = express.Router();
 
 // Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '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'
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 // POST /api/ai/generate - Generate AI content
 router.post('/generate', async (req, res) => {
+  console.log("REQUEST BODY: ", req.body);
   try {
     const { type, context } = req.body;
 
@@ -44,7 +45,7 @@ router.post('/generate', async (req, res) => {
       case 'naam_jodi':
         const name1 = context?.name1 || 'Person 1';
         const name2 = context?.name2 || 'Person 2';
-        prompt = `Generate a fun, creative compatibility result for "${name1}" and "${name2}". Keep it under 50 characters. Make it playful and positive. Examples: "Perfect match! 🌟", "Good vibes! ✨", "Surprising combo! 🎯"`;
+        prompt = `Generate a fun, creative compatibility result for "${name1}" and "${name2}". Keep it under 50 characters. Make it playful and positive.`;
         maxTokens = 50;
         break;
 
@@ -164,6 +165,7 @@ router.post('/generate', async (req, res) => {
     console.error('OpenAI API error:', error);
     
     // Return fallback content on error
+    console.log("FALLBACK TRIGGERED FOR TYPE: ", req.body.type);
     res.json({
       content: getFallbackContent(req.body.type, req.body.context),
       source: 'fallback'
@@ -180,6 +182,11 @@ function getFallbackContent(type, context) {
       "If I had a dollar for every time you had a good idea, I'd have zero dollars.",
       "You're proof that evolution can go in reverse.",
       "You're not stupid, you just have bad luck thinking.",
+      "You're like a dictionary - you add meaning to my life, but I never open you.",
+      "You're the reason why instructions exist.",
+      "You're like WiFi - I can feel you, but I can't see you doing anything useful.",
+      "You're proof that anyone can be anything on the internet.",
+      "You're like a fine wine - you get more annoying with age.",
     ],
     bekaar_salah: [
       "Always trust your first gut feeling, even if it's 3 AM.",
@@ -187,6 +194,11 @@ function getFallbackContent(type, context) {
       "The best way to save money is to never check your bank account.",
       "Procrastination is just future you's problem.",
       "If you can't decide, flip a coin and then do the opposite.",
+      "The early bird gets the worm, but the second mouse gets the cheese.",
+      "If at first you don't succeed, blame someone else.",
+      "Life's too short to make your bed.",
+      "When in doubt, add more butter.",
+      "The best time to plant a tree was 20 years ago. The second best time is never.",
     ],
     faltu_joke: [
       "Why don't scientists trust atoms? Because they make up everything!",
@@ -194,6 +206,11 @@ function getFallbackContent(type, context) {
       "Why don't eggs tell jokes? They'd crack each other up!",
       "What do you call a fake noodle? An impasta!",
       "Why did the scarecrow win an award? He was outstanding in his field!",
+      "I'm reading a book about anti-gravity. It's impossible to put down!",
+      "Why don't skeletons fight each other? They don't have the guts!",
+      "What do you call a bear with no teeth? A gummy bear!",
+      "Why did the math book look so sad? Because it had too many problems!",
+      "I used to be a baker, but I couldn't make enough dough.",
     ],
     naam_jodi: [
       "Perfect match! 🌟",
@@ -201,6 +218,7 @@ function getFallbackContent(type, context) {
       "Decent compatibility! 👍",
       "Interesting combo! 🤔",
       "Could work! 💫",
+      "Surprising match! 🎯",
     ],
     sach_ya_faltu: [
       "Bananas are berries, but strawberries aren't.",
@@ -208,6 +226,11 @@ function getFallbackContent(type, context) {
       "Wombats poop in cubes.",
       "Sharks have been around longer than trees.",
       "Honey never spoils.",
+      "A group of flamingos is called a 'flamboyance'.",
+      "Dolphins have names for each other.",
+      "The human brain uses 20% of the body's energy.",
+      "Cows have best friends.",
+      "Penguins can jump 6 feet in the air.",
     ],
     ye_ya_wo: [
       JSON.stringify({ left: "Pizza", right: "Burger" }),
@@ -215,6 +238,11 @@ function getFallbackContent(type, context) {
       JSON.stringify({ left: "Beach", right: "Mountains" }),
       JSON.stringify({ left: "Coffee", right: "Tea" }),
       JSON.stringify({ left: "Cats", right: "Dogs" }),
+      JSON.stringify({ left: "Netflix", right: "YouTube" }),
+      JSON.stringify({ left: "Morning", right: "Night" }),
+      JSON.stringify({ left: "Sweet", right: "Spicy" }),
+      JSON.stringify({ left: "City", right: "Village" }),
+      JSON.stringify({ left: "Books", right: "Movies" }),
     ],
     kaunsa_jhooth: [
       JSON.stringify({
@@ -233,18 +261,32 @@ function getFallbackContent(type, context) {
         ],
         fakeIndex: 1,
       }),
+      JSON.stringify({
+        statements: [
+          "Chameleons change color to match their surroundings.",
+          "Dogs can't see in color.",
+          "The human body has 206 bones.",
+        ],
+        fakeIndex: 0,
+      }),
     ],
     galat_button: [
       "You chose... poorly.",
       "Interesting choice...",
       "Hmm, okay.",
       "Really? That one?",
+      "You do you.",
       "Bold move.",
     ],
     shabdbaazi: [
       JSON.stringify({ word: "CHUTKULA", hint: "Funny thing", answer: "CHUTKULA" }),
       JSON.stringify({ word: "JUGAAD", hint: "Creative solution", answer: "JUGAAD" }),
       JSON.stringify({ word: "FIRANGI", hint: "Foreigner", answer: "FIRANGI" }),
+      JSON.stringify({ word: "BHAI", hint: "Brother/friend", answer: "BHAI" }),
+      JSON.stringify({ word: "MASALA", hint: "Spice mix", answer: "MASALA" }),
+      JSON.stringify({ word: "DOST", hint: "Friend", answer: "DOST" }),
+      JSON.stringify({ word: "KHUSHI", hint: "Happiness", answer: "KHUSHI" }),
+      JSON.stringify({ word: "PYAAR", hint: "Love", answer: "PYAAR" }),
     ],
     dialogbaazi: [
       JSON.stringify({
@@ -257,11 +299,107 @@ function getFallbackContent(type, context) {
         options: ["Mr. India", "Don", "Agneepath"],
         answer: 0,
       }),
+      JSON.stringify({
+        dialogue: "All is well",
+        options: ["3 Idiots", "PK", "Zindagi Na Milegi Dobara"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Bade bade deshon mein aisi chhoti chhoti baatein hoti rehti hain",
+        options: ["DDLJ", "Kabhi Khushi Kabhie Gham", "Veer-Zaara"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Don ko pakadna mushkil hi nahi, namumkin hai",
+        options: ["Don", "Baazigar", "Agneepath"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Mere paas maa hai",
+        options: ["Deewar", "Sholay", "Trishul"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Pushpa, I hate tears",
+        options: ["Amar Prem", "Anand", "Aradhana"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Picture abhi baaki hai mere dost",
+        options: ["Om Shanti Om", "Luck By Chance", "Rockstar"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Tumse na ho payega",
+        options: ["Gangs of Wasseypur", "Sacred Games", "Satya"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Rahul, naam toh suna hoga",
+        options: ["DDLJ", "Kuch Kuch Hota Hai", "Kal Ho Naa Ho"],
+        answer: 1,
+      }),
+      JSON.stringify({
+        dialogue: "Ja Simran ja, jee le apni zindagi",
+        options: ["Veer-Zaara", "DDLJ", "Mohabbatein"],
+        answer: 1,
+      }),
+      JSON.stringify({
+        dialogue: "Ek ladka aur ek ladki kabhi dost nahi ho sakte",
+        options: ["Student of the Year", "Kuch Kuch Hota Hai", "Yeh Jawaani Hai Deewani"],
+        answer: 1,
+      }),
+      JSON.stringify({
+        dialogue: "Aaj mere paas gaadi hai, bangla hai, bank balance hai",
+        options: ["Deewar", "Trishul", "Muqaddar Ka Sikandar"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Kabhi kabhi jeetne ke liye kuch haarna padta hai",
+        options: ["Chak De India", "Lagaan", "Dangal"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "How's the josh?",
+        options: ["URI: The Surgical Strike", "Shershaah", "Lakshya"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Zindagi badi honi chahiye, lambi nahi",
+        options: ["Anand", "Kal Ho Naa Ho", "Dear Zindagi"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Hum jahan khade ho jaate hain, line wahi se shuru hoti hai",
+        options: ["Sultan", "Agneepath", "Karan Arjun"],
+        answer: 1,
+      }),
+      JSON.stringify({
+        dialogue: "Babumoshai, zindagi badi honi chahiye",
+        options: ["Anand", "Guide", "Abhimaan"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Rishte mein toh hum tumhare baap lagte hain",
+        options: ["Dilwale", "Wanted", "Dabangg"],
+        answer: 0,
+      }),
+      JSON.stringify({
+        dialogue: "Itni shiddat se maine tumhe paane ki koshish ki hai",
+        options: ["Om Shanti Om", "Veer-Zaara", "Jab Tak Hai Jaan"],
+        answer: 0,
+      }),
     ],
     ulta_pulta_shabd: [
-      JSON.stringify({ scrambled: "HALP", answer: "PHAL" }),
-      JSON.stringify({ scrambled: "KAMAB", answer: "KAMAB" }),
-      JSON.stringify({ scrambled: "RATAP", answer: "PATAR" }),
+      JSON.stringify({ scrambled: "TAIHH", answer: "HATHI" }),
+      JSON.stringify({ scrambled: "ILLIB", answer: "BILLI" }),
+      JSON.stringify({ scrambled: "DNARBA", answer: "BANDAR" }),
+      JSON.stringify({ scrambled: "TAUKT", answer: "KUTTA" }),
+      JSON.stringify({ scrambled: "AABILJ", answer: "JALEBI" }),
+      JSON.stringify({ scrambled: "UDDAL", answer: "LADDU" }),
+      JSON.stringify({ scrambled: "ABFRI", answer: "BARFI" }),
+      JSON.stringify({ scrambled: "HKREE", answer: "KHEER" }),
+      JSON.stringify({ scrambled: "ALHWA", answer: "HALWA" }),
     ],
     number_dhoondo: [
       "Between 1-33",
@@ -269,6 +407,7 @@ function getFallbackContent(type, context) {
       "Between 67-100",
     ],
   };
+  console.log("FALLBACK TRIGGERED FOR TYPE: ", type);
 
   // Handle JSON fallbacks
   if (type === 'kaunsa_jhooth' || type === 'shabdbaazi' || type === 'dialogbaazi' || type === 'ulta_pulta_shabd' || type === 'ye_ya_wo') {

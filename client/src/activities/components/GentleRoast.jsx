@@ -3,19 +3,6 @@ import { motion } from 'framer-motion';
 import { generateAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
 
-const ROASTS = [
-  "You're like a cloud - when you disappear, it's a beautiful day.",
-  "You're the human equivalent of a participation trophy.",
-  "If I had a dollar for every time you had a good idea, I'd have zero dollars.",
-  "You're proof that evolution can go in reverse.",
-  "You're not stupid, you just have bad luck thinking.",
-  "You're like a dictionary - you add meaning to my life, but I never open you.",
-  "You're the reason why instructions exist.",
-  "You're like WiFi - I can feel you, but I can't see you doing anything useful.",
-  "You're proof that anyone can be anything on the internet.",
-  "You're like a fine wine - you get more annoying with age.",
-];
-
 function GentleRoast({ activity, onComplete }) {
   const [roast, setRoast] = useState(null);
   const [showRoast, setShowRoast] = useState(false);
@@ -37,9 +24,8 @@ function GentleRoast({ activity, onComplete }) {
       }
     } catch (error) {
       console.error('Error generating roast:', error);
-      // Fallback to hardcoded roasts
-      const randomRoast = ROASTS[Math.floor(Math.random() * ROASTS.length)];
-      setRoast(randomRoast);
+      // Server should always return fallback, but if parsing fails, use default
+      setRoast("You're like a cloud - when you disappear, it's a beautiful day.");
     } finally {
       setIsGenerating(false);
       setTimeout(() => {

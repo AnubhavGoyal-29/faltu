@@ -3,16 +3,18 @@ import { motion } from 'framer-motion';
 import { generateAIContent } from '../../utils/ai.js';
 import { ACTIVITY_DESCRIPTIONS } from '../registry.js';
 
-const COMPATIBILITY_COMMENTS = [
-  "Perfect match! 🌟",
-  "Good vibes! ✨",
-  "Decent compatibility! 👍",
-  "Interesting combo! 🤔",
-  "Could work! 💫",
-  "Surprising match! 🎯",
-];
+// Simple hash function to generate deterministic value from string
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+}
 
-// Calculate compatibility percentage based on names (fun algorithm)
+// Calculate compatibility percentage based on names (deterministic algorithm)
 function calculateCompatibility(name1, name2) {
   const n1 = name1.toLowerCase().trim();
   const n2 = name2.toLowerCase().trim();
@@ -30,11 +32,14 @@ function calculateCompatibility(name1, name2) {
   }
   const commonScore = (commonLetters.size / Math.max(n1.length, n2.length)) * 50;
   
-  // Random factor for fun (adds 0-30%)
-  const randomFactor = Math.random() * 30;
+  // Deterministic factor based on names (adds 0-30% consistently)
+  // Combine both names to create a deterministic seed
+  const combinedNames = (n1 + n2).split('').sort().join('');
+  const hash = simpleHash(combinedNames);
+  const deterministicFactor = (hash % 31); // 0-30 range
   
   // Combine scores
-  const total = (lengthScore * 0.3 + commonScore * 0.4 + randomFactor);
+  const total = (lengthScore * 0.3 + commonScore * 0.4 + deterministicFactor);
   return Math.min(100, Math.max(20, Math.round(total))); // Clamp between 20-100%
 }
 
@@ -64,19 +69,13 @@ function NaamJodi({ activity, onComplete }) {
         if (aiResult) {
           setComment(aiResult);
         } else {
-          // Fallback to hardcoded comments
-          const randomComment = COMPATIBILITY_COMMENTS[
-            Math.floor(Math.random() * COMPATIBILITY_COMMENTS.length)
-          ];
-          setComment(randomComment);
+          // Server should always return fallback, but if parsing fails, use default
+          setComment("Perfect match! 🌟");
         }
       } catch (error) {
         console.error('Error generating compatibility:', error);
-        // Fallback to hardcoded comments
-        const randomComment = COMPATIBILITY_COMMENTS[
-          Math.floor(Math.random() * COMPATIBILITY_COMMENTS.length)
-        ];
-        setComment(randomComment);
+        // Server should always return fallback, but if parsing fails, use default
+        setComment("Perfect match! 🌟");
       } finally {
         setIsGenerating(false);
         setTimeout(() => {
