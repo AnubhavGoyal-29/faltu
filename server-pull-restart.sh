@@ -12,9 +12,11 @@ echo "🚀 Starting deployment..."
 echo ""
 
 # Step 1: Pull latest code
-echo "📥 Pulling latest code from main branch..."
-git pull origin main
-echo "✅ Code pulled"
+echo "📥 Pulling latest code from chirag-main branch..."
+git fetch origin
+git checkout chirag-main || git checkout -b chirag-main origin/chirag-main
+git pull origin chirag-main
+echo "✅ Code pulled from chirag-main"
 echo ""
 
 # Step 2: Install backend dependencies
